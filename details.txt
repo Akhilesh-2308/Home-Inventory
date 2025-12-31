@@ -1,0 +1,9 @@
+supabase database uri - postgresql://postgres:1MXHGUgMDHZfqX6h@db.rnjsanhhxrsrqphmaprk.supabase.co:5432/postgres
+
+secret key - 8C88825FB200E1A46B424C703FD3E521DDA2ECF0FBC30DCB3058444CDFEC0900
+
+SUPABASE URL = https://supabase.com/dashboard/project/rnjsanhhxrsrqphmaprk
+
+
+
+service role key - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuanNhbmhoeHJzcnFwaG1hcHJrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzE1ODE5MiwiZXhwIjoyMDgyNzM0MTkyfQ.v5QViNQWJJZWJXVe8BT7SHHtRDJl3rXmku1cJao3lTo

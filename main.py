@@ -256,3 +256,25 @@ def list_categories(
         .all()
     )
     return [{"name": r[0], "count": r[1]} for r in rows if r[0]]
+
+@app.get("/items/by-category/{category}", response_model=list[schemas.ItemOut])
+def get_items_by_category(
+    category: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    return db.query(models.Item).filter(
+        models.Item.owner_id == current_user.id,
+        models.Item.category == category
+    ).all()
+
+@app.get("/items/by-room/{room}", response_model=list[schemas.ItemOut])
+def get_items_by_room(
+    room: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    return db.query(models.Item).filter(
+        models.Item.owner_id == current_user.id,
+        models.Item.room == room
+    ).all()

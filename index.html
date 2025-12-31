@@ -324,7 +324,9 @@
             </svg>
         );
 
-        const API_BASE_URL = "https://home-inventory-production.up.railway.app";
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://127.0.0.1:8001'
+            : 'https://home-inventory-production.up.railway.app';
 
         const getAuthHeaders = (isJson = true) => {
             const token = localStorage.getItem('access_token');
@@ -745,708 +747,606 @@
                     'Books': '📚',
                     'Toys': '🎮',
                     'Travel Items': '✈️',
-                    'Car Accessories': '🚗',
-                };
-                return icons[category] || '📦';
-            };
+                                    < div className = "flex-1" >
+                                        <p className="font-black text-xs text-purple-300 uppercase tracking-wider mb-1 drop-shadow-md">📍 Location</p>
+                                        <p className="text-lg font-bold text-white/90">{item.room}</p>
+                                    </div >
+                                </div >
 
-            const ItemCard = ({ item }) => (
-                <div data-item-id={item.id} className="group relative rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden animate-bounce-in hover:scale-105 backdrop-blur-xl" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>
-                    <div className={`h-1.5 bg-gradient-to-r ${getCategoryColor(item.category)}`}></div>
-                    <div className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="flex-1">
-                                <h3 className="text-2xl font-black text-white/90 mb-3 group-hover:text-pink-300 transition-colors leading-tight drop-shadow-md">
-                                    {item.name}
-                                </h3>
-                                {item.category && (
-                                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-white text-sm font-black bg-gradient-to-r ${getCategoryColor(item.category)} shadow-md border border-white/30 drop-shadow-lg`}>
-                                        <span className="text-lg">{getCategoryIcon(item.category)}</span>
-                                        {item.category}
-                                    </div>
-                                )}
-                                {item.image_path && (
-                                    <div className="mt-4">
-                                        <img
-                                            src={item.image_path}
-                                            alt={item.image_name || item.name}
-                                            className="w-full h-48 object-cover rounded-2xl cursor-pointer mb-3 hover:scale-105 transition-transform duration-300 shadow-lg border border-white/30"
-                                            onClick={() => {
-                                                const loc = `${item.room}${item.cupboard ? ', ' + item.cupboard : ''}${item.shelf ? ', ' + item.shelf : ''}${item.loft ? ', ' + item.loft : ''}`;
-                                                openAlert('📍 Location: ' + loc);
-                                            }}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                    onClick={() => startEditItem(item)}
-                                    className="p-3 text-blue-300 rounded-xl transition-all hover:scale-125 shadow-lg font-black backdrop-blur-lg hover:shadow-xl"
-                                    style={{ background: 'rgba(59, 130, 246, 0.4)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                >
-                                    <Edit2 size={20} />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteItem(item.id)}
-                                    className="p-3 text-red-300 rounded-xl transition-all hover:scale-125 shadow-lg font-black backdrop-blur-lg hover:shadow-xl"
-                                    style={{ background: 'rgba(239, 68, 68, 0.4)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                >
-                                    <Trash2 size={20} />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4 mt-6">
-                            <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)' }}>
-                                <MapPin size={24} className="text-purple-300 mt-0.5 flex-shrink-0" />
-                                <div className="flex-1">
-                                    <p className="font-black text-xs text-purple-300 uppercase tracking-wider mb-1 drop-shadow-md">📍 Location</p>
-                                    <p className="text-lg font-bold text-white/90">{item.room}</p>
-                                </div>
-                            </div>
-
-                            {(item.cupboard || item.shelf || item.loft) && (
-                                <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)' }}>
-                                    <Archive size={24} className="text-pink-300 mt-0.5 flex-shrink-0" />
-                                    <div className="flex-1">
-                                        <p className="font-black text-xs text-pink-300 uppercase tracking-wider mb-1 drop-shadow-md">🗄️ Storage</p>
-                                        <p className="text-base font-bold text-white/90">
-                                            {item.cupboard && <span className="font-black">{item.cupboard}</span>}
-                                            {(item.cupboard && (item.shelf || item.loft)) && <span className="text-white/40 mx-2">•</span>}
-                                            {item.shelf && <span className="font-black">{item.shelf}</span>}
-                                            {(item.shelf && item.loft) && <span className="text-white/40 mx-2">•</span>}
-                                            {item.loft && <span className="font-black">{item.loft}</span>}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* INSIDE ITEMS and Notes */}
-                            {(item.inside_items || item.notes) && (
-                                <div className="pt-4 border-t border-white/20">
-                                    {item.inside_items && (
-                                        <div className="mb-3">
-                                            <p className="font-black text-xs text-white/70 uppercase tracking-wider mb-2 drop-shadow-md">📦 Inside Items</p>
-                                            <ul className="inside-items-list text-white/80 text-sm">
-                                                {String(item.inside_items).split('\n').map((line, idx) => {
-                                                    const trimmed = (line || '').trim();
-                                                    if (!trimmed) return null;
-                                                    const display = trimmed.replace(/^[-\.\s]+/, '');
-                                                    return <li key={idx} className="flex items-start gap-2"><span className="mr-2 text-pink-400">✓</span><span>{display}</span></li>;
-                                                })}
-                                            </ul>
-                                        </div>
-                                    )}
-
-                                    {item.notes && (
-                                        <p className="text-sm text-white/70 italic leading-relaxed p-3 rounded-xl border border-white/20 backdrop-blur-lg" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>{item.notes}</p>
-                                    )}
-                                </div>
-                            )}
+                {(item.cupboard || item.shelf || item.loft) && (
+                    <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)' }}>
+                        <Archive size={24} className="text-pink-300 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                            <p className="font-black text-xs text-pink-300 uppercase tracking-wider mb-1 drop-shadow-md">🗄️ Storage</p>
+                            <p className="text-base font-bold text-white/90">
+                                {item.cupboard && <span className="font-black">{item.cupboard}</span>}
+                                {(item.cupboard && (item.shelf || item.loft)) && <span className="text-white/40 mx-2">•</span>}
+                                {item.shelf && <span className="font-black">{item.shelf}</span>}
+                                {(item.shelf && item.loft) && <span className="text-white/40 mx-2">•</span>}
+                                {item.loft && <span className="font-black">{item.loft}</span>}
+                            </p>
                         </div>
                     </div>
-                </div>
-            );
+                )
+        }
 
-            // If user is not authenticated, show a login gate page that links to auth pages
-            if (!isAuthenticated) {
-                return (
-                    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-                        {/* Animated floating glass orbs */}
-                        <div className="absolute top-20 left-20 w-40 h-40 glass-effect-colored rounded-full opacity-30 animate-float" style={{ background: 'rgba(236, 72, 153, 0.4)' }}></div>
-                        <div className="absolute bottom-32 right-32 w-52 h-52 glass-effect-colored rounded-full opacity-25 animate-float" style={{ background: 'rgba(139, 92, 246, 0.4)', animationDelay: '1s' }}></div>
-                        <div className="absolute top-1/3 right-20 w-32 h-32 glass-effect-colored rounded-full opacity-20 animate-float" style={{ background: 'rgba(59, 130, 246, 0.3)', animationDelay: '2s' }}></div>
-
-                        <div className="glass-effect-colored rounded-3xl p-16 max-w-2xl w-full text-center animate-bounce-in relative z-10" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(59, 130, 246, 0.15) 100%)' }}>
-                            <div className="flex items-center justify-center mb-8">
-                                <a href="/" className="inline-flex items-center gap-4 text-center no-underline cursor-pointer hover:opacity-90 transition-opacity group">
-                                    <div className="relative group animate-float">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity animate-glow"></div>
-                                        <div className="relative bg-gradient-to-br from-pink-400 via-purple-500 to-blue-500 p-6 rounded-3xl shadow-2xl">
-                                            <Home className="text-white" size={48} />
-                                        </div>
-                                    </div>
-                                    <span className="text-4xl font-black bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent drop-shadow-lg">Home Inventory</span>
-                                </a>
-                            </div>
-                            <h2 className="text-4xl font-black text-white/90 mb-4 drop-shadow-lg">Welcome to your space 🌟</h2>
-                            <p className="text-white/70 mb-10 text-lg font-semibold drop-shadow-md">Organize with liquid glass style</p>
-                            <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                <a href={`/auth/login-page?next=${nextParam}`} className="px-8 py-4 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-lg"
-                                    style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>
-                                    Sign In ✨
-                                </a>
-                                <a href={`/auth/signup-page?next=${nextParam}`} className="px-8 py-4 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-lg"
-                                    style={{ background: 'rgba(59, 130, 246, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.4)' }}>
-                                    Create Account 🚀
-                                </a>
-                            </div>
-                            <p className="text-sm text-white/60 mt-8 font-semibold drop-shadow-md">New here? Sign up. Already have an account? Sign in.</p>
-                        </div>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="min-h-screen">
-                    {notification && (
-                        <div className={`fixed top-6 right-6 px-8 py-4 rounded-2xl shadow-xl z-50 animate-slide-in font-black text-lg border ${notification.type === 'success'
-                            ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white border-emerald-200 shadow-emerald-500/50'
-                            : 'bg-gradient-to-r from-red-400 to-pink-500 text-white border-red-200 shadow-red-500/50'
-                            }`}>
-                            {notification.type === 'success' ? '✓ ' : '⚠ '}{notification.message}
+        {/* INSIDE ITEMS and Notes */ }
+        {
+            (item.inside_items || item.notes) && (
+                <div className="pt-4 border-t border-white/20">
+                    {item.inside_items && (
+                        <div className="mb-3">
+                            <p className="font-black text-xs text-white/70 uppercase tracking-wider mb-2 drop-shadow-md">📦 Inside Items</p>
+                            <ul className="inside-items-list text-white/80 text-sm">
+                                {String(item.inside_items).split('\n').map((line, idx) => {
+                                    const trimmed = (line || '').trim();
+                                    if (!trimmed) return null;
+                                    const display = trimmed.replace(/^[-\.\s]+/, '');
+                                    return <li key={idx} className="flex items-start gap-2"><span className="mr-2 text-pink-400">✓</span><span>{display}</span></li>;
+                                })}
+                            </ul>
                         </div>
                     )}
 
-                    <div className="glass-effect-colored sticky top-0 z-40 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', backdropFilter: 'blur(40px)' }}>
-                        <div className="max-w-7xl mx-auto px-6 py-6">
-                            <div className="flex items-center justify-between flex-wrap gap-6">
-                                <a href="/" className="flex items-center gap-4 cursor-pointer hover:opacity-90 transition-opacity group" >
-                                    <div className="relative group-hover:animate-float">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity animate-glow"></div>
-                                        <div className="relative bg-gradient-to-br from-pink-400 via-purple-500 to-blue-500 p-4 rounded-3xl shadow-xl">
-                                            <Home className="text-white" size={40} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h1 className="text-4xl font-black bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent drop-shadow-lg">
-                                            Home Inventory
-                                        </h1>
-                                        <p className="text-white/70 mt-1 font-bold text-sm drop-shadow-md">Organize. Find. Manage.</p>
-                                    </div>
-                                </a>
-                                <div className="flex items-center gap-4">
-                                    {isAuthenticated ? (
-                                        <>
-                                            <button
-                                                onClick={() => setShowAddItem(true)}
-                                                className="group relative flex items-center gap-3 text-white px-8 py-4 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg overflow-hidden shadow-lg"
-                                                style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
-                                            >
-                                                <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                <Plus size={26} className="relative z-10" />
-                                                <span className="relative z-10 hidden sm:inline">Add Item</span>
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    localStorage.removeItem('access_token');
-                                                    clearAppState();
-                                                    setIsAuthenticated(false);
-                                                    showNotification('See you soon!', 'success');
-                                                }}
-                                                className="px-6 py-4 text-white rounded-2xl font-black hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg backdrop-blur-lg"
-                                                style={{ background: 'rgba(239, 68, 68, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                            >
-                                                Logout
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <div className="flex items-center gap-3">
-                                            <a href={`/auth/login-page?next=${nextParam}`} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-2xl font-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 backdrop-blur-lg"
-                                                style={{ background: 'rgba(255, 255, 255, 0.2)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>Sign In</a>
-                                            <a href={`/auth/signup-page?next=${nextParam}`} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-2xl font-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 backdrop-blur-lg"
-                                                style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.7) 0%, rgba(59, 130, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>Sign Up</a>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                    {item.notes && (
+                        <p className="text-sm text-white/70 italic leading-relaxed p-3 rounded-xl border border-white/20 backdrop-blur-lg" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>{item.notes}</p>
+                    )}
+                </div>
+            )
+        }
+                            </div >
+                        </div >
+                    </div >
+                    );
 
-                            {/* Stats */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
-                                    <p className="text-sm font-black text-white/70">📦 Items</p>
-                                    <p className="text-4xl font-black mt-2 bg-gradient-to-r from-pink-300 to-pink-200 bg-clip-text text-transparent">{stats.total}</p>
+        // If user is not authenticated, show a login gate page that links to auth pages
+        if (!isAuthenticated) {
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+                    {/* Animated floating glass orbs */}
+                    <div className="absolute top-20 left-20 w-40 h-40 glass-effect-colored rounded-full opacity-30 animate-float" style={{ background: 'rgba(236, 72, 153, 0.4)' }}></div>
+                    <div className="absolute bottom-32 right-32 w-52 h-52 glass-effect-colored rounded-full opacity-25 animate-float" style={{ background: 'rgba(139, 92, 246, 0.4)', animationDelay: '1s' }}></div>
+                    <div className="absolute top-1/3 right-20 w-32 h-32 glass-effect-colored rounded-full opacity-20 animate-float" style={{ background: 'rgba(59, 130, 246, 0.3)', animationDelay: '2s' }}></div>
+
+                    <div className="glass-effect-colored rounded-3xl p-16 max-w-2xl w-full text-center animate-bounce-in relative z-10" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(59, 130, 246, 0.15) 100%)' }}>
+                        <div className="flex items-center justify-center mb-8">
+                            <a href="/" className="inline-flex items-center gap-4 text-center no-underline cursor-pointer hover:opacity-90 transition-opacity group">
+                                <div className="relative group animate-float">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity animate-glow"></div>
+                                    <div className="relative bg-gradient-to-br from-pink-400 via-purple-500 to-blue-500 p-6 rounded-3xl shadow-2xl">
+                                        <Home className="text-white" size={48} />
+                                    </div>
                                 </div>
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
-                                    <p className="text-sm font-black text-white/70">🏷️ Categories</p>
-                                    <p className="text-4xl font-black mt-2 bg-gradient-to-r from-purple-300 to-purple-200 bg-clip-text text-transparent">{categories.length}</p>
-                                </div>
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
-                                    <p className="text-sm font-black text-white/70">🏠 Rooms</p>
-                                    <p className="text-4xl font-black mt-2 bg-gradient-to-r from-blue-300 to-blue-200 bg-clip-text text-transparent">{rooms.length}</p>
-                                </div>
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
-                                    <p className="text-sm font-black text-white/70">🔍 Results</p>
-                                    <p className="text-4xl font-black mt-2 bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">{searchResults.length}</p>
-                                </div>
-                            </div>
+                                <span className="text-4xl font-black bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent drop-shadow-lg">Home Inventory</span>
+                            </a>
                         </div>
+                        <h2 className="text-4xl font-black text-white/90 mb-4 drop-shadow-lg">Welcome to your space 🌟</h2>
+                        <p className="text-white/70 mb-10 text-lg font-semibold drop-shadow-md">Organize with liquid glass style</p>
+                        <div className="flex flex-col sm:flex-row justify-center gap-4">
+                            <a href={`/auth/login-page?next=${nextParam}`} className="px-8 py-4 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-lg"
+                                style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>
+                                Sign In ✨
+                            </a>
+                            <a href={`/auth/signup-page?next=${nextParam}`} className="px-8 py-4 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-lg"
+                                style={{ background: 'rgba(59, 130, 246, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.4)' }}>
+                                Create Account 🚀
+                            </a>
+                        </div>
+                        <p className="text-sm text-white/60 mt-8 font-semibold drop-shadow-md">New here? Sign up. Already have an account? Sign in.</p>
                     </div>
+                </div>
+            );
+        }
 
-                    <div className="max-w-7xl mx-auto px-6 py-8">
-                        <div className="flex gap-4 mb-8 glass-effect-colored p-2 rounded-2xl shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
-                            <button
-                                onClick={() => { setActiveTab('search'); setViewMode('all'); }}
-                                className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'search'
-                                    ? 'text-white shadow-lg'
-                                    : 'text-white/60 hover:text-white/80'
-                                    }`}
-                                style={activeTab === 'search' ? { background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
-                            >
-                                <div className="flex items-center justify-center gap-3">
-                                    <Search size={24} />
-                                    Search
-                                </div>
-                            </button>
-                            <button
-                                onClick={() => { setActiveTab('all'); setViewMode('all'); }}
-                                className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'all'
-                                    ? 'text-white shadow-lg'
-                                    : 'text-white/60 hover:text-white/80'
-                                    }`}
-                                style={activeTab === 'all' ? { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
-                            >
-                                <div className="flex items-center justify-center gap-3">
-                                    <Package size={24} />
-                                    All Items
-                                    <span className="ml-1 px-3 py-1 bg-white/30 text-white rounded-full text-sm font-black">
-                                        {items.length}
-                                    </span>
-                                </div>
-                            </button>
-                        </div>
+        return (
+            <div className="min-h-screen">
+                {notification && (
+                    <div className={`fixed top-6 right-6 px-8 py-4 rounded-2xl shadow-xl z-50 animate-slide-in font-black text-lg border ${notification.type === 'success'
+                        ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white border-emerald-200 shadow-emerald-500/50'
+                        : 'bg-gradient-to-r from-red-400 to-pink-500 text-white border-red-200 shadow-red-500/50'
+                        }`}>
+                        {notification.type === 'success' ? '✓ ' : '⚠ '}{notification.message}
+                    </div>
+                )}
 
-                        {activeTab === 'search' && (
-                            <div>
-                                <div className="glass-effect-colored rounded-3xl shadow-lg p-8 mb-8" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
-                                    <div className="flex gap-4 flex-wrap">
-                                        <div className="flex-1 relative min-w-64">
-                                            <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-pink-400" size={28} />
-                                            <input
-                                                type="text"
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                                placeholder="Search by name, room, category..."
-                                                className="w-full pl-16 pr-6 py-5 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 text-lg font-bold transition-all shadow-lg"
-                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                            />
-                                        </div>
+                <div className="glass-effect-colored sticky top-0 z-40 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', backdropFilter: 'blur(40px)' }}>
+                    <div className="max-w-7xl mx-auto px-6 py-6">
+                        <div className="flex items-center justify-between flex-wrap gap-6">
+                            <a href="/" className="flex items-center gap-4 cursor-pointer hover:opacity-90 transition-opacity group" >
+                                <div className="relative group-hover:animate-float">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity animate-glow"></div>
+                                    <div className="relative bg-gradient-to-br from-pink-400 via-purple-500 to-blue-500 p-4 rounded-3xl shadow-xl">
+                                        <Home className="text-white" size={40} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h1 className="text-4xl font-black bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent drop-shadow-lg">
+                                        Home Inventory
+                                    </h1>
+                                    <p className="text-white/70 mt-1 font-bold text-sm drop-shadow-md">Organize. Find. Manage.</p>
+                                </div>
+                            </a>
+                            <div className="flex items-center gap-4">
+                                {isAuthenticated ? (
+                                    <>
                                         <button
-                                            onClick={handleSearch}
-                                            className="px-10 py-5 text-white rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg shadow-lg"
+                                            onClick={() => setShowAddItem(true)}
+                                            className="group relative flex items-center gap-3 text-white px-8 py-4 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg overflow-hidden shadow-lg"
                                             style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
                                         >
-                                            🔍 Search
+                                            <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <Plus size={26} className="relative z-10" />
+                                            <span className="relative z-10 hidden sm:inline">Add Item</span>
                                         </button>
-                                    </div>
-                                </div>
-
-                                {searchResults.length > 0 && (
-                                    <div>
-                                        <h2 className="text-4xl font-black text-white/90 mb-8 flex items-center gap-4 drop-shadow-lg">
-                                            <div className="h-10 w-2 bg-gradient-to-b from-pink-400 to-purple-400 rounded-full shadow-lg"></div>
-                                            <span className="bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">Search Results</span>
-                                            <span className="text-2xl font-black bg-gradient-to-r from-pink-300 to-purple-300 bg-clip-text text-transparent">({searchResults.length})</span>
-                                        </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {searchResults.map(item => (
-                                                <ItemCard key={item.id} item={item} />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === 'all' && (
-                            <div>
-                                {viewMode === 'all' && (
-                                    <div>
-                                        <h2 className="text-4xl font-black text-white mb-8 flex items-center gap-4">
-                                            <div className="h-10 w-2 bg-gradient-to-b from-pink-400 to-purple-400 rounded-full"></div>
-                                            <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Explore Your Stuff</span>
-                                        </h2>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                                            {/* Rooms Card */}
-                                            <div
-                                                onClick={() => setViewMode('rooms')}
-                                                className="glass-effect rounded-3xl p-8 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-purple-400/50 group backdrop-blur-md"
-                                            >
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-4 rounded-2xl shadow-lg group-hover:scale-125 transition-transform">
-                                                            <Home className="text-white" size={36} />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-2xl font-black text-white">By Rooms</h3>
-                                                            <p className="text-gray-300 font-bold">{rooms.length} rooms</p>
-                                                        </div>
-                                                    </div>
-                                                    <ChevronRight size={36} className="text-gray-400 group-hover:text-cyan-400 group-hover:translate-x-2 transition-all" />
-                                                </div>
-                                                <div className="flex flex-wrap gap-2 mt-4">
-                                                    {rooms.slice(0, 3).map(room => (
-                                                        <span key={room.name} className="px-4 py-2 bg-blue-500/30 text-blue-100 rounded-full text-sm font-bold border border-blue-400/50">
-                                                            {room.name} ({room.count})
-                                                        </span>
-                                                    ))}
-                                                    {rooms.length > 3 && (
-                                                        <span className="px-4 py-2 bg-white/10 text-gray-300 rounded-full text-sm font-bold border border-white/20">
-                                                            +{rooms.length - 3} more
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Categories Card */}
-                                            <div
-                                                onClick={() => setViewMode('categories')}
-                                                className="glass-effect rounded-3xl p-8 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-purple-400/50 group backdrop-blur-md"
-                                            >
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-4 rounded-2xl shadow-lg group-hover:scale-125 transition-transform">
-                                                            <Tag className="text-white" size={36} />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-2xl font-black text-white">By Categories</h3>
-                                                            <p className="text-gray-300 font-bold">{categories.length} categories</p>
-                                                        </div>
-                                                    </div>
-                                                    <ChevronRight size={36} className="text-gray-400 group-hover:text-pink-400 group-hover:translate-x-2 transition-all" />
-                                                </div>
-                                                <div className="flex flex-wrap gap-2 mt-4">
-                                                    {categories.slice(0, 3).map(cat => (
-                                                        <span key={cat.name} className={`px-4 py-2 text-white rounded-full text-sm font-bold bg-gradient-to-r ${getCategoryColor(cat.name)} border border-white/20`}>
-                                                            {getCategoryIcon(cat.name)} {cat.name} ({cat.count})
-                                                        </span>
-                                                    ))}
-                                                    {categories.length > 3 && (
-                                                        <span className="px-4 py-2 bg-white/10 text-gray-300 rounded-full text-sm font-bold border border-white/20">
-                                                            +{categories.length - 3} more
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <h2 className="text-4xl font-black text-white mb-8 flex items-center gap-4 mt-12">
-                                            <div className="h-10 w-2 bg-gradient-to-b from-pink-400 to-purple-400 rounded-full"></div>
-                                            <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">All Items</span>
-                                        </h2>
-                                        {items.length === 0 ? (
-                                            <div className="glass-effect rounded-3xl p-16 text-center border-2 border-purple-400/50 backdrop-blur-md">
-                                                <Package size={100} className="mx-auto text-purple-400 mb-6 opacity-50" />
-                                                <p className="text-3xl font-black text-white mb-4">No items yet! 📭</p>
-                                                <p className="text-gray-300 mb-8 font-bold text-lg">Start adding items to your inventory</p>
-                                                <button
-                                                    onClick={() => setShowAddItem(true)}
-                                                    className="inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-10 py-5 rounded-2xl hover:shadow-2xl hover:scale-110 transition-all duration-300 font-black text-xl border border-pink-300/50"
-                                                >
-                                                    <Plus size={28} />
-                                                    Add First Item
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                {items.map(item => (
-                                                    <ItemCard key={item.id} item={item} />
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {viewMode === 'rooms' && (
-                                    <div>
-                                        <button
-                                            onClick={() => setViewMode('all')}
-                                            className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
-                                        >
-                                            <ArrowLeft size={20} />
-                                            Back to All Items
-                                        </button>
-                                        <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
-                                            <div className="h-10 w-2 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full"></div>
-                                            All Rooms
-                                        </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {rooms.map(room => (
-                                                <div
-                                                    key={room.name}
-                                                    onClick={() => handleRoomClick(room.name)}
-                                                    className="glass-effect rounded-2xl p-6 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-white group"
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="bg-gradient-to-br from-indigo-500 to-purple-500 p-3 rounded-xl">
-                                                                <Home className="text-white" size={24} />
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="text-xl font-bold text-white/90 group-hover:text-indigo-300 transition-colors">{room.name}</h3>
-                                                                <p className="text-sm text-white/70 font-medium">{room.count} items</p>
-                                                            </div>
-                                                        </div>
-                                                        <ChevronRight size={24} className="text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-2 transition-all" />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {viewMode === 'categories' && (
-                                    <div>
-                                        <button
-                                            onClick={() => setViewMode('all')}
-                                            className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
-                                        >
-                                            <ArrowLeft size={20} />
-                                            Back to All Items
-                                        </button>
-                                        <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
-                                            <div className="h-10 w-2 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full"></div>
-                                            All Categories
-                                        </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {categories.map(cat => (
-                                                <div
-                                                    key={cat.name}
-                                                    onClick={() => handleCategoryClick(cat.name)}
-                                                    className="glass-effect rounded-2xl p-6 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-white group"
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`bg-gradient-to-br ${getCategoryColor(cat.name)} p-3 rounded-xl text-white text-2xl`}>
-                                                                {getCategoryIcon(cat.name)}
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="text-xl font-bold text-white/90 group-hover:text-purple-300 transition-colors">{cat.name}</h3>
-                                                                <p className="text-sm text-white/70 font-medium">{cat.count} items</p>
-                                                            </div>
-                                                        </div>
-                                                        <ChevronRight size={24} className="text-gray-400 group-hover:text-purple-600 group-hover:translate-x-2 transition-all" />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {viewMode === 'room-detail' && (
-                                    <div>
-                                        <button
-                                            onClick={() => setViewMode('rooms')}
-                                            className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
-                                        >
-                                            <ArrowLeft size={20} />
-                                            Back to Rooms
-                                        </button>
-                                        <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
-                                            <div className="h-10 w-2 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full"></div>
-                                            {selectedRoom}
-                                            <span className="text-xl font-bold text-indigo-600">({filteredItems.length} items)</span>
-                                        </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {filteredItems.map(item => (
-                                                <ItemCard key={item.id} item={item} />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {viewMode === 'category-detail' && (
-                                    <div>
-                                        <button
-                                            onClick={() => setViewMode('categories')}
-                                            className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
-                                        >
-                                            <ArrowLeft size={20} />
-                                            Back to Categories
-                                        </button>
-                                        <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
-                                            <div className="h-10 w-2 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full"></div>
-                                            <span className="text-2xl">{getCategoryIcon(selectedCategory)}</span>
-                                            {selectedCategory}
-                                            <span className="text-xl font-bold text-purple-600">({filteredItems.length} items)</span>
-                                        </h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {filteredItems.map(item => (
-                                                <ItemCard key={item.id} item={item} />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    {(showAddItem || editingItem) && (
-                        <div className="fixed inset-0 bg-black/40 backdrop-blur-xl flex items-center justify-center p-4 z-40 animate-fade-in">
-                            <div className="glass-effect-colored rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
-                                <div className="sticky top-0 text-white p-8 rounded-t-3xl border-b border-white/20 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.5) 50%, rgba(59, 130, 246, 0.5) 100%)' }}>
-                                    <div className="flex justify-between items-center">
-                                        <h2 className="text-3xl font-black drop-shadow-lg">
-                                            {editingItem ? '✏️ Edit Item' : '✨ Add New Item'}
-                                        </h2>
                                         <button
                                             onClick={() => {
-                                                setShowAddItem(false);
-                                                setEditingItem(null);
-                                                setItemForm({ name: '', category: '', room: '', cupboard: '', shelf: '', loft: '', inside_items: '', notes: '' });
+                                                localStorage.removeItem('access_token');
+                                                clearAppState();
+                                                setIsAuthenticated(false);
+                                                showNotification('See you soon!', 'success');
                                             }}
-                                            className="p-3 hover:bg-white/30 rounded-2xl transition-all hover:scale-125 font-black"
+                                            className="px-6 py-4 text-white rounded-2xl font-black hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg backdrop-blur-lg"
+                                            style={{ background: 'rgba(239, 68, 68, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                         >
-                                            <X size={32} />
+                                            Logout
                                         </button>
+                                    </>
+                                ) : (
+                                    <div className="flex items-center gap-3">
+                                        <a href={`/auth/login-page?next=${nextParam}`} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-2xl font-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 backdrop-blur-lg"
+                                            style={{ background: 'rgba(255, 255, 255, 0.2)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>Sign In</a>
+                                        <a href={`/auth/signup-page?next=${nextParam}`} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-2xl font-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 backdrop-blur-lg"
+                                            style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.7) 0%, rgba(59, 130, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>Sign Up</a>
                                     </div>
-                                </div>
-                                <div className="p-8 space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-black text-pink-300 mb-2 uppercase tracking-widest drop-shadow-md">
-                                            Item Name *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={itemForm.name}
-                                            onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })}
-                                            className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                            placeholder="e.g., Red Suitcase, Winter Jacket"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-black text-purple-300 mb-2 uppercase tracking-widest drop-shadow-md">Category</label>
-                                        <select
-                                            value={itemForm.category}
-                                            onChange={(e) => setItemForm({ ...itemForm, category: e.target.value })}
-                                            className="w-full px-5 py-4 text-gray-900 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                        >
-                                            <option value="">Select a category</option>
-                                            <option value="Luggage">🧳 Luggage</option>
-                                            <option value="Electrical">⚡ Electrical</option>
-                                            <option value="Electronics">💻 Electronics</option>
-                                            <option value="Document">📄 Document</option>
-                                            <option value="Clothing">👕 Clothing</option>
-                                            <option value="Kitchen">🍳 Kitchen</option>
-                                            <option value="Tools">🔧 Tools</option>
-                                            <option value="Books">📚 Books</option>
-                                            <option value="Toys">🎮 Toys</option>
-                                            <option value="Medical">🩺 Medical</option>
-                                            <option value="Furniture">🪑 Furniture</option>
-                                            <option value="Stationery">✏️ Stationery</option>
-                                            <option value="Accessories">👜 Accessories</option>
-                                            <option value="Travel Items">✈️ Travel Items</option>
-                                            <option value="Car Accessories">🚗 Car Accessories</option>
-                                            <option value="Misc">📦 Misc</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-black text-blue-300 mb-2 uppercase tracking-widest drop-shadow-md">Room *</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={itemForm.room}
-                                            onChange={(e) => setItemForm({ ...itemForm, room: e.target.value })}
-                                            className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                            placeholder="e.g., Master Bedroom, Living Room"
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-black text-blue-300 mb-2 uppercase tracking-widest drop-shadow-md">Cupboard</label>
-                                            <input
-                                                type="text"
-                                                value={itemForm.cupboard}
-                                                onChange={(e) => setItemForm({ ...itemForm, cupboard: e.target.value })}
-                                                className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
-                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                                placeholder="e.g., 1st"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-black text-purple-300 mb-2 uppercase tracking-widest drop-shadow-md">Shelf</label>
-                                            <input
-                                                type="text"
-                                                value={itemForm.shelf}
-                                                onChange={(e) => setItemForm({ ...itemForm, shelf: e.target.value })}
-                                                className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
-                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                                placeholder="e.g., Top"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-black text-pink-300 mb-2 uppercase tracking-widest drop-shadow-md">Loft</label>
-                                            <input
-                                                type="text"
-                                                value={itemForm.loft}
-                                                onChange={(e) => setItemForm({ ...itemForm, loft: e.target.value })}
-                                                className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
-                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                                placeholder="e.g., A"
-                                            />
-                                        </div>
-                                    </div>
+                                )}
+                            </div>
+                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-black text-pink-300 mb-2 uppercase tracking-widest drop-shadow-md">Inside Items</label>
-                                        <textarea
-                                            value={itemForm.inside_items}
-                                            onChange={(e) => setItemForm({ ...itemForm, inside_items: e.target.value })}
-                                            className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                            rows="4"
-                                            placeholder="One item per line"
-                                        />
-                                        <p className="text-xs text-white/70 mt-2 font-bold drop-shadow-md">Each line becomes a bullet point</p>
-                                    </div>
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                            <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                                <p className="text-sm font-black text-white/70">📦 Items</p>
+                                <p className="text-4xl font-black mt-2 bg-gradient-to-r from-pink-300 to-pink-200 bg-clip-text text-transparent">{stats.total}</p>
+                            </div>
+                            <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                                <p className="text-sm font-black text-white/70">🏷️ Categories</p>
+                                <p className="text-4xl font-black mt-2 bg-gradient-to-r from-purple-300 to-purple-200 bg-clip-text text-transparent">{categories.length}</p>
+                            </div>
+                            <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                                <p className="text-sm font-black text-white/70">🏠 Rooms</p>
+                                <p className="text-4xl font-black mt-2 bg-gradient-to-r from-blue-300 to-blue-200 bg-clip-text text-transparent">{rooms.length}</p>
+                            </div>
+                            <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                                <p className="text-sm font-black text-white/70">🔍 Results</p>
+                                <p className="text-4xl font-black mt-2 bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">{searchResults.length}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                    <div>
-                                        <label className="block text-sm font-black text-blue-300 mb-2 uppercase tracking-widest drop-shadow-md">Notes</label>
-                                        <textarea
-                                            value={itemForm.notes}
-                                            onChange={(e) => setItemForm({ ...itemForm, notes: e.target.value })}
-                                            className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                            rows="4"
-                                            placeholder="Add extra details..."
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-black text-purple-300 mb-2 uppercase tracking-widest drop-shadow-md">Photo (optional)</label>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => {
-                                                const f = e.target.files && e.target.files[0];
-                                                setImageFile(f);
-                                                if (f) setImageName(f.name);
-                                            }}
-                                            className="w-full text-white font-bold py-2 px-3 rounded-lg"
-                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
-                                        />
+                <div className="max-w-7xl mx-auto px-6 py-8">
+                    <div className="flex gap-4 mb-8 glass-effect-colored p-2 rounded-2xl shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                        <button
+                            onClick={() => { setActiveTab('search'); setViewMode('all'); }}
+                            className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'search'
+                                ? 'text-white shadow-lg'
+                                : 'text-white/60 hover:text-white/80'
+                                }`}
+                            style={activeTab === 'search' ? { background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
+                        >
+                            <div className="flex items-center justify-center gap-3">
+                                <Search size={24} />
+                                Search
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => { setActiveTab('all'); setViewMode('all'); }}
+                            className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'all'
+                                ? 'text-white shadow-lg'
+                                : 'text-white/60 hover:text-white/80'
+                                }`}
+                            style={activeTab === 'all' ? { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
+                        >
+                            <div className="flex items-center justify-center gap-3">
+                                <Package size={24} />
+                                All Items
+                                <span className="ml-1 px-3 py-1 bg-white/30 text-white rounded-full text-sm font-black">
+                                    {items.length}
+                                </span>
+                            </div>
+                        </button>
+                    </div>
+
+                    {activeTab === 'search' && (
+                        <div>
+                            <div className="glass-effect-colored rounded-3xl shadow-lg p-8 mb-8" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                                <div className="flex gap-4 flex-wrap">
+                                    <div className="flex-1 relative min-w-64">
+                                        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-pink-400" size={28} />
                                         <input
                                             type="text"
-                                            value={imageName}
-                                            onChange={(e) => {
-                                                setImageName(e.target.value);
-                                                setItemForm({ ...itemForm, image_name: e.target.value });
-                                            }}
-                                            placeholder="Optional photo name"
-                                            className="w-full mt-2 px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                            placeholder="Search by name, room, category..."
+                                            className="w-full pl-16 pr-6 py-5 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 text-lg font-bold transition-all shadow-lg"
                                             style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                         />
                                     </div>
                                     <button
-                                        onClick={editingItem ? handleUpdateItem : handleAddItem}
-                                        className="w-full text-white py-6 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-2xl shadow-lg"
+                                        onClick={handleSearch}
+                                        className="px-10 py-5 text-white rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg shadow-lg"
                                         style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
                                     >
-                                        {editingItem ? 'Update' : 'Create'}
+                                        🔍 Search
                                     </button>
                                 </div>
                             </div>
+
+                            {searchResults.length > 0 && (
+                                <div>
+                                    <h2 className="text-4xl font-black text-white/90 mb-8 flex items-center gap-4 drop-shadow-lg">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-pink-400 to-purple-400 rounded-full shadow-lg"></div>
+                                        <span className="bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">Search Results</span>
+                                        <span className="text-2xl font-black bg-gradient-to-r from-pink-300 to-purple-300 bg-clip-text text-transparent">({searchResults.length})</span>
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {searchResults.map(item => (
+                                            <ItemCard key={item.id} item={item} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
-                    {dialog.open && (
-                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-                            <div className="bg-white rounded-2xl p-6 max-w-md w-full text-gray-900" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
+
+                    {activeTab === 'all' && (
+                        <div>
+                            {viewMode === 'all' && (
+                                <div>
+                                    <h2 className="text-4xl font-black text-white mb-8 flex items-center gap-4">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-pink-400 to-purple-400 rounded-full"></div>
+                                        <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Explore Your Stuff</span>
+                                    </h2>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                                        {/* Rooms Card */}
+                                        <div
+                                            onClick={() => setViewMode('rooms')}
+                                            className="glass-effect rounded-3xl p-8 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-purple-400/50 group backdrop-blur-md"
+                                        >
+                                            <div className="flex items-center justify-between mb-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-4 rounded-2xl shadow-lg group-hover:scale-125 transition-transform">
+                                                        <Home className="text-white" size={36} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-2xl font-black text-white">By Rooms</h3>
+                                                        <p className="text-gray-300 font-bold">{rooms.length} rooms</p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight size={36} className="text-gray-400 group-hover:text-cyan-400 group-hover:translate-x-2 transition-all" />
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mt-4">
+                                                {rooms.slice(0, 3).map(room => (
+                                                    <span key={room.name} className="px-4 py-2 bg-blue-500/30 text-blue-100 rounded-full text-sm font-bold border border-blue-400/50">
+                                                        {room.name} ({room.count})
+                                                    </span>
+                                                ))}
+                                                {rooms.length > 3 && (
+                                                    <span className="px-4 py-2 bg-white/10 text-gray-300 rounded-full text-sm font-bold border border-white/20">
+                                                        +{rooms.length - 3} more
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Categories Card */}
+                                        <div
+                                            onClick={() => setViewMode('categories')}
+                                            className="glass-effect rounded-3xl p-8 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-purple-400/50 group backdrop-blur-md"
+                                        >
+                                            <div className="flex items-center justify-between mb-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-4 rounded-2xl shadow-lg group-hover:scale-125 transition-transform">
+                                                        <Tag className="text-white" size={36} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-2xl font-black text-white">By Categories</h3>
+                                                        <p className="text-gray-300 font-bold">{categories.length} categories</p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight size={36} className="text-gray-400 group-hover:text-pink-400 group-hover:translate-x-2 transition-all" />
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mt-4">
+                                                {categories.slice(0, 3).map(cat => (
+                                                    <span key={cat.name} className={`px-4 py-2 text-white rounded-full text-sm font-bold bg-gradient-to-r ${getCategoryColor(cat.name)} border border-white/20`}>
+                                                        {getCategoryIcon(cat.name)} {cat.name} ({cat.count})
+                                                    </span>
+                                                ))}
+                                                {categories.length > 3 && (
+                                                    <span className="px-4 py-2 bg-white/10 text-gray-300 rounded-full text-sm font-bold border border-white/20">
+                                                        +{categories.length - 3} more
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <h2 className="text-4xl font-black text-white mb-8 flex items-center gap-4 mt-12">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-pink-400 to-purple-400 rounded-full"></div>
+                                        <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">All Items</span>
+                                    </h2>
+                                    {items.length === 0 ? (
+                                        <div className="glass-effect rounded-3xl p-16 text-center border-2 border-purple-400/50 backdrop-blur-md">
+                                            <Package size={100} className="mx-auto text-purple-400 mb-6 opacity-50" />
+                                            <p className="text-3xl font-black text-white mb-4">No items yet! 📭</p>
+                                            <p className="text-gray-300 mb-8 font-bold text-lg">Start adding items to your inventory</p>
+                                            <button
+                                                onClick={() => setShowAddItem(true)}
+                                                className="inline-flex items-center gap-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-10 py-5 rounded-2xl hover:shadow-2xl hover:scale-110 transition-all duration-300 font-black text-xl border border-pink-300/50"
+                                            >
+                                                <Plus size={28} />
+                                                Add First Item
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {items.map(item => (
+                                                <ItemCard key={item.id} item={item} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {viewMode === 'rooms' && (
+                                <div>
+                                    <button
+                                        onClick={() => setViewMode('all')}
+                                        className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
+                                    >
+                                        <ArrowLeft size={20} />
+                                        Back to All Items
+                                    </button>
+                                    <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full"></div>
+                                        All Rooms
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {rooms.map(room => (
+                                            <div
+                                                key={room.name}
+                                                onClick={() => handleRoomClick(room.name)}
+                                                className="glass-effect rounded-2xl p-6 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-white group"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="bg-gradient-to-br from-indigo-500 to-purple-500 p-3 rounded-xl">
+                                                            <Home className="text-white" size={24} />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-xl font-bold text-white/90 group-hover:text-indigo-300 transition-colors">{room.name}</h3>
+                                                            <p className="text-sm text-white/70 font-medium">{room.count} items</p>
+                                                        </div>
+                                                    </div>
+                                                    <ChevronRight size={24} className="text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-2 transition-all" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {viewMode === 'categories' && (
+                                <div>
+                                    <button
+                                        onClick={() => setViewMode('all')}
+                                        className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
+                                    >
+                                        <ArrowLeft size={20} />
+                                        Back to All Items
+                                    </button>
+                                    <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full"></div>
+                                        All Categories
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {categories.map(cat => (
+                                            <div
+                                                key={cat.name}
+                                                onClick={() => handleCategoryClick(cat.name)}
+                                                className="glass-effect rounded-2xl p-6 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-white group"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`bg-gradient-to-br ${getCategoryColor(cat.name)} p-3 rounded-xl text-white text-2xl`}>
+                                                            {getCategoryIcon(cat.name)}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-xl font-bold text-white/90 group-hover:text-purple-300 transition-colors">{cat.name}</h3>
+                                                            <p className="text-sm text-white/70 font-medium">{cat.count} items</p>
+                                                        </div>
+                                                    </div>
+                                                    <ChevronRight size={24} className="text-gray-400 group-hover:text-purple-600 group-hover:translate-x-2 transition-all" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {viewMode === 'room-detail' && (
+                                <div>
+                                    <button
+                                        onClick={() => setViewMode('rooms')}
+                                        className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
+                                    >
+                                        <ArrowLeft size={20} />
+                                        Back to Rooms
+                                    </button>
+                                    <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-indigo-600 to-purple-600 rounded-full"></div>
+                                        {selectedRoom}
+                                        <span className="text-xl font-bold text-indigo-600">({filteredItems.length} items)</span>
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {filteredItems.map(item => (
+                                            <ItemCard key={item.id} item={item} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {viewMode === 'category-detail' && (
+                                <div>
+                                    <button
+                                        onClick={() => setViewMode('categories')}
+                                        className="flex items-center gap-2 px-6 py-3 bg-white rounded-xl shadow-md hover:shadow-lg transition-all mb-6 font-bold text-gray-700"
+                                    >
+                                        <ArrowLeft size={20} />
+                                        Back to Categories
+                                    </button>
+                                    <h2 className="text-3xl font-black text-gray-800 mb-6 flex items-center gap-4">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full"></div>
+                                        <span className="text-2xl">{getCategoryIcon(selectedCategory)}</span>
+                                        {selectedCategory}
+                                        <span className="text-xl font-bold text-purple-600">({filteredItems.length} items)</span>
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {filteredItems.map(item => (
+                                            <ItemCard key={item.id} item={item} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {(showAddItem || editingItem) && (
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-xl flex items-center justify-center p-4 z-40 animate-fade-in">
+                        <div className="glass-effect-colored rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                            <div className="sticky top-0 text-white p-8 rounded-t-3xl border-b border-white/20 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.5) 50%, rgba(59, 130, 246, 0.5) 100%)' }}>
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-3xl font-black drop-shadow-lg">
+                                        {editingItem ? '✏️ Edit Item' : '✨ Add New Item'}
+                                    </h2>
+                                    <button
+                                        onClick={() => {
+                                            setShowAddItem(false);
+                                            setEditingItem(null);
+                                            setItemForm({ name: '', category: '', room: '', cupboard: '', shelf: '', loft: '', inside_items: '', notes: '' });
+                                        }}
+                                        className="p-3 hover:bg-white/30 rounded-2xl transition-all hover:scale-125 font-black"
+                                    >
+                                        <X size={32} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div>
+                                    <label className="block text-sm font-black text-pink-300 mb-2 uppercase tracking-widest drop-shadow-md">
+                                        Item Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={itemForm.name}
+                                        onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })}
+                                        className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
+                                        style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
+                                        placeholder="e.g., Red Suitcase, Winter Jacket"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-black text-purple-300 mb-2 uppercase tracking-widest drop-shadow-md">Category</label>
+                                    <select
+                                        value={itemForm.category}
+                                        onChange={(e) => setItemForm({ ...itemForm, category: e.target.value })}
+                                        className="w-full px-5 py-4 text-gray-900 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
+                                        style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
+                                    >
+                                        <option value="">Select a category</option>
+                                        <option value="Luggage">🧳 Luggage</option>
+                                        <option value="Electrical">⚡ Electrical</option>
+                                        <option value="Electronics">💻 Electronics</option>
+                                        <option value="Document">📄 Document</option>
+                                        <option value="Clothing">👕 Clothing</option>
+                                        <option value="Kitchen">🍳 Kitchen</option>
+                                        <option value="Tools">🔧 Tools</option>
+                                        <option value="Books">📚 Books</option>
+                                        <option value="Toys">🎮 Toys</option>
+                                        <option value="Medical">🩺 Medical</option>
+                                        <option value="Furniture">🪑 Furniture</option>
+                                        <option value="Stationery">✏️ Stationery</option>
+                                        <option value="Accessories">👜 Accessories</option>
+                                        <option value="Travel Items">✈️ Travel Items</option>
+                                        <option value="Car Accessories">🚗 Car Accessories</option>
+                                        <option value="Misc">📦 Misc</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-black text-blue-300 mb-2 uppercase tracking-widest drop-shadow-md">Room *</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={itemForm.room}
+                                        onChange={(e) => setItemForm({ ...itemForm, room: e.target.value })}
+                                        className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
+                                        style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
+                                        placeholder="e.g., Master Bedroom, Living Room"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-black text-blue-300 mb-2 uppercase tracking-widest drop-shadow-md">Cupboard</label>
+                                        <input
+                                            type="text"
+                                            value={itemForm.cupboard}
+                                            onChange={(e) => setItemForm({ ...itemForm, cupboard: e.target.value })}
+                                            className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
+                                            placeholder="e.g., 1st"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-black text-purple-300 mb-2 uppercase tracking-widest drop-shadow-md">Shelf</label>
+                                        <input
+                                            type="text"
+                                            value={itemForm.shelf}
+                                            onChange={(e) => setItemForm({ ...itemForm, shelf: e.target.value })}
+                                            className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
+                                            placeholder="e.g., Top"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-black text-pink-300 mb-2 uppercase tracking-widest drop-shadow-md">Loft</label>
+                                        <input
+                                            type="text"
+                                            value={itemForm.loft}
+                                            onChange={(e) => setItemForm({ ...itemForm, loft: e.target.value })}
+                                            className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
+                                            placeholder="e.g., A"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-black text-pink-300 mb-2 uppercase tracking-widest drop-shadow-md">Inside Items</label>
+                                    <textarea
+                                        value={itemForm.inside_items}
+                                        onChange={(e) => setItemForm({ ...itemForm, inside_items: e.target.value })}
+                                        className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
+                                        style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
+                                        rows="4"
+                                        placeholder="One item per line"
+                                    />
+                                    <p className="text-xs text-white/70 mt-2 font-bold drop-shadow-md">Each line becomes a bullet point</p>
+                                </div>
+
                                 <h3 className="text-xl font-bold mb-2">{dialog.type === 'confirm' ? 'Confirm' : 'Notice'}</h3>
                                 <p className="mb-6 text-sm whitespace-pre-wrap">{dialog.message}</p>
                                 <div className="flex justify-end gap-3">
@@ -1457,38 +1357,38 @@
                                 </div>
                             </div>
                         </div>
-                    )}
-                </div>
-            );
+                )}
+                    </div>
+                );
         }
 
-        ReactDOM.render(<HomeInventoryApp />, document.getElementById('root'));
+                ReactDOM.render(<HomeInventoryApp />, document.getElementById('root'));
 
-        // Floating Image Gallery Button (outside React)
-        (function () {
+                // Floating Image Gallery Button (outside React)
+                (function () {
             const btn = document.createElement('button');
-            btn.textContent = '🖼️ Gallery';
-            btn.style.position = 'fixed';
-            btn.style.right = '20px';
-            btn.style.bottom = '20px';
-            btn.style.zIndex = 9999;
-            btn.style.padding = '14px 20px';
-            btn.style.borderRadius = '20px';
-            btn.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
-            btn.style.color = 'white';
-            btn.style.fontWeight = '900';
-            btn.style.fontSize = '16px';
-            btn.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.3)';
-            btn.style.cursor = 'pointer';
-            btn.style.border = '2px solid rgba(255,255,255,0.4)';
-            btn.style.backdropFilter = 'blur(16px)';
-            btn.style.transition = 'all 0.3s ease';
-            btn.onmouseover = function () {
-                this.style.transform = 'scale(1.08)';
+                btn.textContent = '🖼️ Gallery';
+                btn.style.position = 'fixed';
+                btn.style.right = '20px';
+                btn.style.bottom = '20px';
+                btn.style.zIndex = 9999;
+                btn.style.padding = '14px 20px';
+                btn.style.borderRadius = '20px';
+                btn.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
+                btn.style.color = 'white';
+                btn.style.fontWeight = '900';
+                btn.style.fontSize = '16px';
+                btn.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.3)';
+                btn.style.cursor = 'pointer';
+                btn.style.border = '2px solid rgba(255,255,255,0.4)';
+                btn.style.backdropFilter = 'blur(16px)';
+                btn.style.transition = 'all 0.3s ease';
+                btn.onmouseover = function () {
+                    this.style.transform = 'scale(1.08)';
                 this.style.boxShadow = '0 15px 40px rgba(59, 130, 246, 0.5)';
             };
-            btn.onmouseout = function () {
-                this.style.transform = 'scale(1)';
+                btn.onmouseout = function () {
+                    this.style.transform = 'scale(1)';
                 this.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.3)';
             };
             btn.onclick = async () => {
@@ -1496,7 +1396,7 @@
                 const token = localStorage.getItem('access_token');
                 if (!token) {
                     window.location.href = '/auth/login-page';
-                    return;
+                return;
                 }
 
                 const overlay = document.createElement('div');
@@ -1521,22 +1421,22 @@
 
                 const localGetCategoryIcon = (category) => {
                     const icons = {
-                        'Luggage': '🧳',
-                        'Electronics': '💻',
-                        'Document': '📄',
-                        'Clothing': '👕',
-                        'Kitchen': '🍳',
-                        'Tools': '🔧',
-                        'Books': '📚',
-                        'Toys': '🎮',
-                        'Medical': '🩺',
-                        'Furniture': '🪑',
-                        'Stationery': '✏️',
-                        'Accessories': '👜',
-                        'Misc': '📦',
-                        'Electrical': '⚡'
+                    'Luggage': '🧳',
+                'Electronics': '💻',
+                'Document': '📄',
+                'Clothing': '👕',
+                'Kitchen': '🍳',
+                'Tools': '🔧',
+                'Books': '📚',
+                'Toys': '🎮',
+                'Medical': '🩺',
+                'Furniture': '🪑',
+                'Stationery': '✏️',
+                'Accessories': '👜',
+                'Misc': '📦',
+                'Electrical': '⚡'
                     };
-                    return icons[category] || '📦';
+                return icons[category] || '📦';
                 };
 
                 const closeBtn = document.createElement('button');
@@ -1562,7 +1462,7 @@
                     this.style.transform = 'scale(1)';
                 };
                 closeBtn.onclick = () => {
-                    try { document.body.removeChild(overlay); } catch (e) { }
+                    try {document.body.removeChild(overlay); } catch (e) { }
                 };
                 overlay.appendChild(closeBtn);
 
@@ -1579,506 +1479,297 @@
 
                 try {
                     // First, load categories and show category grid. Clicking a category will load images for that category.
-                    const resCats = await fetch(`${API_BASE_URL}/categories/list`, { headers: getAuthHeaders(false) });
-                    if (!resCats.ok) {
-                        status.textContent = 'Failed to load categories';
-                        return;
+                    const resCats = await fetch(`${API_BASE_URL}/categories/list`, {headers: getAuthHeaders(false) });
+                if (!resCats.ok) {
+                    status.textContent = 'Failed to load categories';
+                return;
                     }
-                    const cats = await resCats.json();
-                    status.remove();
-                    if (!Array.isArray(cats) || cats.length === 0) {
+                const cats = await resCats.json();
+                status.remove();
+                if (!Array.isArray(cats) || cats.length === 0) {
                         const no = document.createElement('div');
-                        no.textContent = 'No categories found. Add items with images to populate the gallery.';
-                        no.style.color = '#1d1d1d';
-                        no.style.gridColumn = '1 / -1';
-                        no.style.fontWeight = '900';
-                        no.style.fontSize = '16px';
-                        inner.appendChild(no);
-                        return;
+                no.textContent = 'No categories found. Add items with images to populate the gallery.';
+                no.style.color = '#1d1d1d';
+                no.style.gridColumn = '1 / -1';
+                no.style.fontWeight = '900';
+                no.style.fontSize = '16px';
+                inner.appendChild(no);
+                return;
                     }
 
                     const renderCategories = (categories) => {
-                        inner.innerHTML = '';
+                    inner.innerHTML = '';
                         categories.forEach(cat => {
                             const el = document.createElement('div');
-                            el.style.background = 'rgba(255, 255, 255, 0.9)';
-                            el.style.padding = '18px';
-                            el.style.borderRadius = '16px';
-                            el.style.display = 'flex';
-                            el.style.flexDirection = 'column';
-                            el.style.alignItems = 'flex-start';
-                            el.style.justifyContent = 'center';
-                            el.style.border = '2px solid rgba(255, 255, 255, 0.6)';
-                            el.style.cursor = 'pointer';
-                            el.onmouseover = function () { this.style.transform = 'scale(1.03)'; this.style.boxShadow = '0 10px 30px rgba(59,130,246,0.12)'; };
-                            el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.boxShadow = 'none'; };
-                            const title = document.createElement('div');
-                            title.textContent = (cat.name || 'Unnamed') + ' (' + (cat.count || 0) + ')';
-                            title.style.fontWeight = '900';
-                            title.style.fontSize = '16px';
-                            title.style.color = '#1d1d1d';
-                            title.style.marginBottom = '8px';
-                            const icon = document.createElement('div');
-                            icon.textContent = localGetCategoryIcon(cat.name) || '📦';
-                            icon.style.fontSize = '26px';
-                            icon.style.marginBottom = '6px';
-                            el.appendChild(icon);
-                            el.appendChild(title);
+                el.style.background = 'rgba(255, 255, 255, 0.9)';
+                el.style.padding = '18px';
+                el.style.borderRadius = '16px';
+                el.style.display = 'flex';
+                el.style.flexDirection = 'column';
+                el.style.alignItems = 'flex-start';
+                el.style.justifyContent = 'center';
+                el.style.border = '2px solid rgba(255, 255, 255, 0.6)';
+                el.style.cursor = 'pointer';
+                el.onmouseover = function () {this.style.transform = 'scale(1.03)'; this.style.boxShadow = '0 10px 30px rgba(59,130,246,0.12)'; };
+                el.onmouseout = function () {this.style.transform = 'scale(1)'; this.style.boxShadow = 'none'; };
+                const title = document.createElement('div');
+                title.textContent = (cat.name || 'Unnamed') + ' (' + (cat.count || 0) + ')';
+                title.style.fontWeight = '900';
+                title.style.fontSize = '16px';
+                title.style.color = '#1d1d1d';
+                title.style.marginBottom = '8px';
+                const icon = document.createElement('div');
+                icon.textContent = localGetCategoryIcon(cat.name) || '📦';
+                icon.style.fontSize = '26px';
+                icon.style.marginBottom = '6px';
+                el.appendChild(icon);
+                el.appendChild(title);
                             el.onclick = () => showImagesForCategory(cat.name);
-                            inner.appendChild(el);
+                inner.appendChild(el);
                         });
                     };
 
                     const renderImages = (items, imgsAll) => {
-                        inner.innerHTML = '';
-                        if (!Array.isArray(items) || items.length === 0) {
+                    inner.innerHTML = '';
+                if (!Array.isArray(items) || items.length === 0) {
                             const no = document.createElement('div');
-                            no.textContent = 'No images in this category.';
-                            no.style.color = '#1d1d1d';
-                            no.style.gridColumn = '1 / -1';
-                            no.style.fontWeight = '900';
-                            no.style.fontSize = '16px';
-                            inner.appendChild(no);
-                            const backBtn = document.createElement('button');
-                            backBtn.textContent = '⬅️ Back to categories';
-                            backBtn.style.gridColumn = '1 / -1';
-                            backBtn.style.padding = '12px 16px';
-                            backBtn.style.marginTop = '12px';
-                            backBtn.style.borderRadius = '12px';
-                            backBtn.style.cursor = 'pointer';
-                            backBtn.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
-                            backBtn.style.color = '#fff';
+                no.textContent = 'No images in this category.';
+                no.style.color = '#1d1d1d';
+                no.style.gridColumn = '1 / -1';
+                no.style.fontWeight = '900';
+                no.style.fontSize = '16px';
+                inner.appendChild(no);
+                const backBtn = document.createElement('button');
+                backBtn.textContent = '⬅️ Back to categories';
+                backBtn.style.gridColumn = '1 / -1';
+                backBtn.style.padding = '12px 16px';
+                backBtn.style.marginTop = '12px';
+                backBtn.style.borderRadius = '12px';
+                backBtn.style.cursor = 'pointer';
+                backBtn.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
+                backBtn.style.color = '#fff';
                             backBtn.onclick = () => renderCategories(cats);
-                            inner.appendChild(backBtn);
-                            return;
+                inner.appendChild(backBtn);
+                return;
                         }
                         items.forEach(item => {
                             if (!item.image_path) return;
-                            const el = document.createElement('div');
-                            el.style.background = 'rgba(255, 255, 255, 0.9)';
-                            el.style.padding = '10px';
-                            el.style.borderRadius = '16px';
-                            el.style.display = 'flex';
-                            el.style.flexDirection = 'column';
-                            el.style.border = '2px solid rgba(255, 255, 255, 0.5)';
-                            el.style.backdropFilter = 'blur(16px)';
-                            el.style.transition = 'all 0.3s ease';
-                            el.style.cursor = 'pointer';
-                            el.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.borderColor = 'rgba(59, 130, 246, 0.8)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)'; };
-                            el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.borderColor = 'rgba(255, 255, 255, 0.5)'; this.style.boxShadow = 'none'; };
-                            const img = document.createElement('img');
-                            img.src = item.image_path;
-                            img.alt = item.image_name || item.name;
-                            img.style.width = '100%';
-                            img.style.height = '180px';
-                            img.style.objectFit = 'cover';
-                            img.style.borderRadius = '12px';
-                            img.style.cursor = 'pointer';
-                            img.onclick = () => { showDetail(item); };
-                            const title = document.createElement('div');
-                            title.textContent = item.image_name || item.name;
-                            title.style.marginTop = '10px';
-                            title.style.fontWeight = '900';
-                            title.style.color = '#1d1d1d';
-                            title.style.fontSize = '14px';
-                            title.style.overflow = 'hidden';
-                            title.style.textOverflow = 'ellipsis';
-                            title.style.whiteSpace = 'nowrap';
-                            el.appendChild(img);
-                            el.appendChild(title);
-                            inner.appendChild(el);
+                const el = document.createElement('div');
+                el.style.background = 'rgba(255, 255, 255, 0.9)';
+                el.style.padding = '10px';
+                el.style.borderRadius = '16px';
+                el.style.display = 'flex';
+                el.style.flexDirection = 'column';
+                            img.onclick = () => {showDetail(item); };
+                const title = document.createElement('div');
+                title.textContent = item.image_name || item.name;
+                title.style.marginTop = '10px';
+                title.style.fontWeight = '900';
+                title.style.color = '#1d1d1d';
+                title.style.fontSize = '14px';
+                title.style.overflow = 'hidden';
+                title.style.textOverflow = 'ellipsis';
+                title.style.whiteSpace = 'nowrap';
+                el.appendChild(img);
+                el.appendChild(title);
+                inner.appendChild(el);
                         });
-                        const back = document.createElement('button');
-                        back.textContent = '⬅️ Back to categories';
-                        back.style.gridColumn = '1 / -1';
-                        back.style.padding = '12px 16px';
-                        back.style.marginTop = '12px';
-                        back.style.borderRadius = '12px';
-                        back.style.cursor = 'pointer';
-                        back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
-                        back.style.color = '#fff';
-                        back.style.fontWeight = '900';
-                        back.style.border = '2px solid rgba(255,255,255,0.4)';
+                const back = document.createElement('button');
+                back.textContent = '⬅️ Back to categories';
+                back.style.gridColumn = '1 / -1';
+                back.style.padding = '12px 16px';
+                back.style.marginTop = '12px';
+                back.style.borderRadius = '12px';
+                back.style.cursor = 'pointer';
+                back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
+                back.style.color = '#fff';
+                back.style.fontWeight = '900';
+                back.style.border = '2px solid rgba(255,255,255,0.4)';
                         back.onclick = () => renderCategories(cats);
-                        inner.appendChild(back);
+                inner.appendChild(back);
                     };
 
                     const showDetail = (item) => {
-                        inner.innerHTML = '';
-                        const panel = document.createElement('div');
-                        panel.style.background = 'rgba(255, 255, 255, 0.95)';
-                        panel.style.padding = '24px';
-                        panel.style.borderRadius = '20px';
-                        panel.style.maxWidth = '900px';
-                        panel.style.margin = '20px auto';
-                        panel.style.color = '#1d1d1d';
-                        panel.style.border = '2px solid rgba(255, 255, 255, 0.6)';
-                        panel.style.backdropFilter = 'blur(32px)';
-                        panel.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.1)';
+                    inner.innerHTML = '';
+                const panel = document.createElement('div');
+                panel.style.background = 'rgba(255, 255, 255, 0.95)';
+                panel.style.padding = '24px';
+                panel.style.borderRadius = '20px';
+                panel.style.maxWidth = '900px';
+                panel.style.margin = '20px auto';
+                panel.style.color = '#1d1d1d';
+                panel.style.border = '2px solid rgba(255, 255, 255, 0.6)';
+                panel.style.backdropFilter = 'blur(32px)';
+                panel.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.1)';
 
-                        const big = document.createElement('img');
-                        big.src = item.image_path;
-                        big.style.width = '100%';
-                        big.style.maxHeight = '520px';
-                        big.style.objectFit = 'contain';
-                        big.style.borderRadius = '16px';
-                        big.style.marginBottom = '20px';
-                        big.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.15)';
-                        big.style.border = '1px solid rgba(255, 255, 255, 0.5)';
-                        panel.appendChild(big);
+                const big = document.createElement('img');
+                big.src = item.image_path;
+                big.style.width = '100%';
+                big.style.maxHeight = '520px';
+                big.style.objectFit = 'contain';
+                big.style.borderRadius = '16px';
+                big.style.marginBottom = '20px';
+                big.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.15)';
+                big.style.border = '1px solid rgba(255, 255, 255, 0.5)';
+                panel.appendChild(big);
 
-                        const title = document.createElement('h2');
-                        title.textContent = item.image_name || item.name || 'Image';
-                        title.style.margin = '16px 0 12px';
-                        title.style.fontSize = '28px';
-                        title.style.fontWeight = '900';
-                        title.style.color = '#1d1d1d';
-                        panel.appendChild(title);
+                const title = document.createElement('h2');
+                title.textContent = item.image_name || item.name || 'Image';
+                title.style.margin = '16px 0 12px';
+                title.style.fontSize = '28px';
+                title.style.fontWeight = '900';
+                title.style.color = '#1d1d1d';
+                panel.appendChild(title);
 
-                        const meta = document.createElement('div');
-                        meta.style.display = 'grid';
-                        meta.style.gridTemplateColumns = '1fr 1fr';
-                        meta.style.gap = '12px';
-                        meta.style.marginBottom = '16px';
+                const meta = document.createElement('div');
+                meta.style.display = 'grid';
+                meta.style.gridTemplateColumns = '1fr 1fr';
+                meta.style.gap = '12px';
+                meta.style.marginBottom = '16px';
 
                         const mk = (label, val) => {
                             const d = document.createElement('div');
-                            d.style.background = 'rgba(59, 130, 246, 0.05)';
-                            d.style.padding = '12px';
-                            d.style.borderRadius = '12px';
-                            d.style.border = '1px solid rgba(59, 130, 246, 0.08)';
-                            const l = document.createElement('div');
-                            l.textContent = label;
-                            l.style.fontSize = '13px';
-                            l.style.color = '#3b82f6';
-                            l.style.fontWeight = '900';
-                            l.style.textTransform = 'uppercase';
-                            const v = document.createElement('div');
-                            v.textContent = val || '-';
-                            v.style.marginTop = '6px';
-                            v.style.fontWeight = '900';
-                            v.style.color = '#1d1d1d';
-                            d.appendChild(l);
-                            d.appendChild(v);
-                            return d;
+                d.style.background = 'rgba(59, 130, 246, 0.05)';
+                d.style.padding = '12px';
+                d.style.borderRadius = '12px';
+                d.style.border = '1px solid rgba(59, 130, 246, 0.08)';
+                const l = document.createElement('div');
+                l.textContent = label;
+                l.style.fontSize = '13px';
+                l.style.color = '#3b82f6';
+                l.style.fontWeight = '900';
+                l.style.textTransform = 'uppercase';
+                const v = document.createElement('div');
+                v.textContent = val || '-';
+                v.style.marginTop = '6px';
+                v.style.fontWeight = '900';
+                v.style.color = '#1d1d1d';
+                d.appendChild(l);
+                d.appendChild(v);
+                return d;
                         };
 
-                        meta.appendChild(mk('Category', item.category));
-                        meta.appendChild(mk('Room', item.room));
-                        meta.appendChild(mk('Cupboard', item.cupboard));
-                        meta.appendChild(mk('Shelf', item.shelf));
-                        meta.appendChild(mk('Loft', item.loft));
-                        meta.appendChild(mk('File', item.image_name || item.name));
-                        panel.appendChild(meta);
+                meta.appendChild(mk('Category', item.category));
+                meta.appendChild(mk('Room', item.room));
+                meta.appendChild(mk('Cupboard', item.cupboard));
+                meta.appendChild(mk('Shelf', item.shelf));
+                meta.appendChild(mk('Loft', item.loft));
+                meta.appendChild(mk('File', item.image_name || item.name));
+                panel.appendChild(meta);
 
-                        if (item.inside_items) {
+                if (item.inside_items) {
                             const ins = document.createElement('div');
-                            ins.style.marginTop = '16px';
-                            ins.style.padding = '16px';
-                            ins.style.background = 'rgba(59, 130, 246, 0.05)';
-                            ins.style.borderRadius = '12px';
-                            ins.style.border = '1px solid rgba(59, 130, 246, 0.08)';
-                            const lbl = document.createElement('div');
-                            lbl.textContent = 'Inside Items';
-                            lbl.style.fontWeight = '900';
-                            lbl.style.color = '#3b82f6';
-                            lbl.style.marginBottom = '10px';
-                            lbl.style.fontSize = '14px';
-                            lbl.style.textTransform = 'uppercase';
-                            ins.appendChild(lbl);
-                            const ul = document.createElement('ul');
-                            ul.style.paddingLeft = '20px';
-                            ul.style.listStyle = 'none';
+                ins.style.marginTop = '16px';
+                ins.style.padding = '16px';
+                ins.style.background = 'rgba(59, 130, 246, 0.05)';
+                ins.style.borderRadius = '12px';
+                ins.style.border = '1px solid rgba(59, 130, 246, 0.08)';
+                const lbl = document.createElement('div');
+                lbl.textContent = 'Inside Items';
+                lbl.style.fontWeight = '900';
+                lbl.style.color = '#3b82f6';
+                lbl.style.marginBottom = '10px';
+                lbl.style.fontSize = '14px';
+                lbl.style.textTransform = 'uppercase';
+                ins.appendChild(lbl);
+                const ul = document.createElement('ul');
+                ul.style.paddingLeft = '20px';
+                ul.style.listStyle = 'none';
                             String(item.inside_items).split('\n').forEach(line => {
                                 const t = line && line.trim();
-                                if (t) {
+                if (t) {
                                     const li = document.createElement('li');
-                                    li.textContent = '✓ ' + t.replace(/^[-.\s]+/, '');
-                                    li.style.color = '#1d1d1d';
-                                    li.style.fontWeight = '600';
-                                    li.style.marginBottom = '4px';
-                                    ul.appendChild(li);
+                li.textContent = '✓ ' + t.replace(/^[-.\s]+/, '');
+                li.style.color = '#1d1d1d';
+                li.style.fontWeight = '600';
+                li.style.marginBottom = '4px';
+                ul.appendChild(li);
                                 }
                             });
-                            ins.appendChild(ul);
-                            panel.appendChild(ins);
+                ins.appendChild(ul);
+                panel.appendChild(ins);
                         }
 
-                        if (item.notes) {
+                if (item.notes) {
                             const notes = document.createElement('div');
-                            notes.style.marginTop = '16px';
-                            notes.style.padding = '16px';
-                            notes.style.background = 'rgba(139, 92, 246, 0.05)';
-                            notes.style.borderRadius = '12px';
-                            notes.style.border = '1px solid rgba(139, 92, 246, 0.08)';
-                            const lbl = document.createElement('div');
-                            lbl.textContent = 'Notes';
-                            lbl.style.fontWeight = '900';
-                            lbl.style.color = '#8b5cf6';
-                            lbl.style.marginBottom = '8px';
-                            lbl.style.fontSize = '14px';
-                            lbl.style.textTransform = 'uppercase';
-                            notes.appendChild(lbl);
-                            const p = document.createElement('div');
-                            p.textContent = item.notes;
-                            p.style.whiteSpace = 'pre-wrap';
-                            p.style.color = '#1d1d1d';
-                            p.style.fontWeight = '600';
-                            notes.appendChild(p);
-                            panel.appendChild(notes);
+                notes.style.marginTop = '16px';
+                notes.style.padding = '16px';
+                notes.style.background = 'rgba(139, 92, 246, 0.05)';
+                notes.style.borderRadius = '12px';
+                notes.style.border = '1px solid rgba(139, 92, 246, 0.08)';
+                const lbl = document.createElement('div');
+                lbl.textContent = 'Notes';
+                lbl.style.fontWeight = '900';
+                lbl.style.color = '#8b5cf6';
+                lbl.style.marginBottom = '8px';
+                lbl.style.fontSize = '14px';
+                lbl.style.textTransform = 'uppercase';
+                notes.appendChild(lbl);
+                const p = document.createElement('div');
+                p.textContent = item.notes;
+                p.style.whiteSpace = 'pre-wrap';
+                p.style.color = '#1d1d1d';
+                p.style.fontWeight = '600';
+                notes.appendChild(p);
+                panel.appendChild(notes);
                         }
 
-                        const actions = document.createElement('div');
-                        actions.style.display = 'flex';
-                        actions.style.gap = '12px';
-                        actions.style.marginTop = '20px';
-                        const back = document.createElement('button');
-                        back.textContent = '⬅️ Back';
-                        back.style.padding = '14px 20px';
-                        back.style.borderRadius = '14px';
-                        back.style.cursor = 'pointer';
-                        back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
-                        back.style.color = '#fff';
-                        back.style.fontWeight = '900';
-                        back.style.border = '2px solid rgba(255,255,255,0.4)';
-                        back.style.fontSize = '14px';
-                        back.style.transition = 'all 0.3s ease';
-                        back.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.4)'; };
-                        back.onmouseout = function () { this.style.transform = 'scale(1)'; };
-                        back.onclick = () => { renderCategories(cats); };
-                        actions.appendChild(back);
-                        panel.appendChild(actions);
-                        if (!item.image_path) return;
-                        const el = document.createElement('div');
-                        el.style.background = 'rgba(255, 255, 255, 0.9)';
-                        el.style.padding = '10px';
-                        el.style.borderRadius = '16px';
-                        el.style.display = 'flex';
-                        el.style.flexDirection = 'column';
-                        el.style.border = '2px solid rgba(255, 255, 255, 0.5)';
-                        el.style.backdropFilter = 'blur(16px)';
-                        el.style.transition = 'all 0.3s ease';
-                        el.style.cursor = 'pointer';
-                        el.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.borderColor = 'rgba(59, 130, 246, 0.8)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)'; };
-                        el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.borderColor = 'rgba(255, 255, 255, 0.5)'; this.style.boxShadow = 'none'; };
-                        const img = document.createElement('img');
-                        img.src = item.image_path;
-                        img.alt = item.image_name || item.name;
-                        img.style.width = '100%';
-                        img.style.height = '180px';
-                        img.style.objectFit = 'cover';
-                        img.style.borderRadius = '12px';
-                        img.style.cursor = 'pointer';
-                        img.onclick = () => { showDetail(item); };
-                        const title = document.createElement('div');
-                        title.textContent = item.image_name || item.name;
-                        title.style.marginTop = '10px';
-                        title.style.fontWeight = '900';
-                        title.style.color = '#1d1d1d';
-                        title.style.fontSize = '14px';
-                        title.style.overflow = 'hidden';
-                        title.style.textOverflow = 'ellipsis';
-                        title.style.whiteSpace = 'nowrap';
-                        el.appendChild(img);
-                        el.appendChild(title);
-                        inner.appendChild(el);
-                    });
-                    const back = document.createElement('button');
-                    back.textContent = '⬅️ Back to categories';
-                    back.style.gridColumn = '1 / -1';
-                    back.style.padding = '12px 16px';
-                    back.style.marginTop = '12px';
-                    back.style.borderRadius = '12px';
-                    back.style.cursor = 'pointer';
-                    back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
-                    back.style.color = '#fff';
-                    back.style.fontWeight = '900';
-                    back.style.border = '2px solid rgba(255,255,255,0.4)';
-                    back.onclick = () => renderCategories(cats);
-                    inner.appendChild(back);
-                };
+                const actions = document.createElement('div');
+                actions.style.display = 'flex';
+                actions.style.gap = '12px';
+                actions.style.marginTop = '20px';
+                const back = document.createElement('button');
+                back.textContent = '⬅️ Back';
+                back.style.padding = '14px 20px';
+                back.style.borderRadius = '14px';
+                back.style.cursor = 'pointer';
+                back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
+                back.style.color = '#fff';
+                back.style.fontWeight = '900';
+                back.style.border = '2px solid rgba(255,255,255,0.4)';
+                back.style.fontSize = '14px';
+                back.style.transition = 'all 0.3s ease';
+                back.onmouseover = function () {this.style.transform = 'scale(1.05)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.4)'; };
+                back.onmouseout = function () {this.style.transform = 'scale(1)'; };
+                        back.onclick = () => {renderCategories(cats); };
+                actions.appendChild(back);
+                panel.appendChild(actions);
 
-                const showDetail = (item) => {
-                    inner.innerHTML = '';
-                    const panel = document.createElement('div');
-                    panel.style.background = 'rgba(255, 255, 255, 0.95)';
-                    panel.style.padding = '24px';
-                    panel.style.borderRadius = '20px';
-                    panel.style.maxWidth = '900px';
-                    panel.style.margin = '20px auto';
-                    panel.style.color = '#1d1d1d';
-                    panel.style.border = '2px solid rgba(255, 255, 255, 0.6)';
-                    panel.style.backdropFilter = 'blur(32px)';
-                    panel.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.1)';
-
-                    const big = document.createElement('img');
-                    big.src = item.image_path;
-                    big.style.width = '100%';
-                    big.style.maxHeight = '520px';
-                    big.style.objectFit = 'contain';
-                    big.style.borderRadius = '16px';
-                    big.style.marginBottom = '20px';
-                    big.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.15)';
-                    big.style.border = '1px solid rgba(255, 255, 255, 0.5)';
-                    panel.appendChild(big);
-
-                    const title = document.createElement('h2');
-                    title.textContent = item.image_name || item.name || 'Image';
-                    title.style.margin = '16px 0 12px';
-                    title.style.fontSize = '28px';
-                    title.style.fontWeight = '900';
-                    title.style.color = '#1d1d1d';
-                    panel.appendChild(title);
-
-                    const meta = document.createElement('div');
-                    meta.style.display = 'grid';
-                    meta.style.gridTemplateColumns = '1fr 1fr';
-                    meta.style.gap = '12px';
-                    meta.style.marginBottom = '16px';
-
-                    const mk = (label, val) => {
-                        const d = document.createElement('div');
-                        d.style.background = 'rgba(59, 130, 246, 0.05)';
-                        d.style.padding = '12px';
-                        d.style.borderRadius = '12px';
-                        d.style.border = '1px solid rgba(59, 130, 246, 0.08)';
-                        const l = document.createElement('div');
-                        l.textContent = label;
-                        l.style.fontSize = '13px';
-                        l.style.color = '#3b82f6';
-                        l.style.fontWeight = '900';
-                        l.style.textTransform = 'uppercase';
-                        const v = document.createElement('div');
-                        v.textContent = val || '-';
-                        v.style.marginTop = '6px';
-                        v.style.fontWeight = '900';
-                        v.style.color = '#1d1d1d';
-                        d.appendChild(l);
-                        d.appendChild(v);
-                        return d;
+                inner.appendChild(panel);
+                overlay.scrollTop = 0;
                     };
 
-                    meta.appendChild(mk('Category', item.category));
-                    meta.appendChild(mk('Room', item.room));
-                    meta.appendChild(mk('Cupboard', item.cupboard));
-                    meta.appendChild(mk('Shelf', item.shelf));
-                    meta.appendChild(mk('Loft', item.loft));
-                    meta.appendChild(mk('File', item.image_name || item.name));
-                    panel.appendChild(meta);
-
-                    if (item.inside_items) {
-                        const ins = document.createElement('div');
-                        ins.style.marginTop = '16px';
-                        ins.style.padding = '16px';
-                        ins.style.background = 'rgba(59, 130, 246, 0.05)';
-                        ins.style.borderRadius = '12px';
-                        ins.style.border = '1px solid rgba(59, 130, 246, 0.08)';
-                        const lbl = document.createElement('div');
-                        lbl.textContent = 'Inside Items';
-                        lbl.style.fontWeight = '900';
-                        lbl.style.color = '#3b82f6';
-                        lbl.style.marginBottom = '10px';
-                        lbl.style.fontSize = '14px';
-                        lbl.style.textTransform = 'uppercase';
-                        ins.appendChild(lbl);
-                        const ul = document.createElement('ul');
-                        ul.style.paddingLeft = '20px';
-                        ul.style.listStyle = 'none';
-                        String(item.inside_items).split('\n').forEach(line => {
-                            const t = line && line.trim();
-                            if (t) {
-                                const li = document.createElement('li');
-                                li.textContent = '✓ ' + t.replace(/^[-.\s]+/, '');
-                                li.style.color = '#1d1d1d';
-                                li.style.fontWeight = '600';
-                                li.style.marginBottom = '4px';
-                                ul.appendChild(li);
-                            }
-                        });
-                        ins.appendChild(ul);
-                        panel.appendChild(ins);
-                    }
-
-                    if (item.notes) {
-                        const notes = document.createElement('div');
-                        notes.style.marginTop = '16px';
-                        notes.style.padding = '16px';
-                        notes.style.background = 'rgba(139, 92, 246, 0.05)';
-                        notes.style.borderRadius = '12px';
-                        notes.style.border = '1px solid rgba(139, 92, 246, 0.08)';
-                        const lbl = document.createElement('div');
-                        lbl.textContent = 'Notes';
-                        lbl.style.fontWeight = '900';
-                        lbl.style.color = '#8b5cf6';
-                        lbl.style.marginBottom = '8px';
-                        lbl.style.fontSize = '14px';
-                        lbl.style.textTransform = 'uppercase';
-                        notes.appendChild(lbl);
-                        const p = document.createElement('div');
-                        p.textContent = item.notes;
-                        p.style.whiteSpace = 'pre-wrap';
-                        p.style.color = '#1d1d1d';
-                        p.style.fontWeight = '600';
-                        notes.appendChild(p);
-                        panel.appendChild(notes);
-                    }
-
-                    const actions = document.createElement('div');
-                    actions.style.display = 'flex';
-                    actions.style.gap = '12px';
-                    actions.style.marginTop = '20px';
-                    const back = document.createElement('button');
-                    back.textContent = '⬅️ Back';
-                    back.style.padding = '14px 20px';
-                    back.style.borderRadius = '14px';
-                    back.style.cursor = 'pointer';
-                    back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
-                    back.style.color = '#fff';
-                    back.style.fontWeight = '900';
-                    back.style.border = '2px solid rgba(255,255,255,0.4)';
-                    back.style.fontSize = '14px';
-                    back.style.transition = 'all 0.3s ease';
-                    back.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.4)'; };
-                    back.onmouseout = function () { this.style.transform = 'scale(1)'; };
-                    back.onclick = () => { renderCategories(cats); };
-                    actions.appendChild(back);
-                    panel.appendChild(actions);
-
-                    inner.appendChild(panel);
-                    overlay.scrollTop = 0;
-                };
-
-                const showImagesForCategory = async (categoryName) => {
+                    const showImagesForCategory = async (categoryName) => {
                     inner.innerHTML = '';
-                    const load = document.createElement('div');
-                    load.textContent = 'Loading images for ' + categoryName + '...';
-                    load.style.gridColumn = '1 / -1';
-                    load.style.color = '#1d1d1d';
-                    load.style.fontWeight = '900';
-                    inner.appendChild(load);
-                    try {
-                        const resp = await fetch(`${API_BASE_URL}/items/by-category/${encodeURIComponent(categoryName)}`, { headers: getAuthHeaders(false) });
-                        const data = await resp.json();
-                        // filter only items that have images (Supabase URLs start with https://)
-                        const withImages = Array.isArray(data) ? data.filter(it => it && it.image_path && it.image_path.startsWith('https://')) : [];
-                        renderImages(withImages, data);
-                    } catch (err) {
-                        inner.innerHTML = '';
-                        const errEl = document.createElement('div');
-                        errEl.textContent = 'Failed to load images for category.';
-                        errEl.style.color = '#1d1d1d';
-                        inner.appendChild(errEl);
-                    }
-                };
+                const load = document.createElement('div');
+                load.textContent = 'Loading images for ' + categoryName + '...';
+                load.style.gridColumn = '1 / -1';
+                load.style.color = '#1d1d1d';
+                load.style.fontWeight = '900';
+                inner.appendChild(load);
+                try {
+                            const resp = await fetch(`${API_BASE_URL}/items/by-category/${encodeURIComponent(categoryName)}`, { headers: getAuthHeaders(false) });
+                            const data = await resp.json();
+                            // filter only items that have images (Supabase URLs start with https://)
+                            const withImages = Array.isArray(data) ? data.filter(it => it && it.image_path && it.image_path.startsWith('https://')) : [];
+                            renderImages(withImages, data);
+                        } catch (err) {
+                            inner.innerHTML = '';
+                            const errEl = document.createElement('div');
+                            errEl.textContent = 'Failed to load images for category.';
+                            errEl.style.color = '#1d1d1d';
+                            inner.appendChild(errEl);
+                        }
+                    };
 
-                // initial render: show categories
-                renderCategories(cats);
-            } catch (err) {
-                status.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
-            }
-        };
-        document.body.appendChild(btn);
-        }) ();
+                    // initial render: show categories
+                    renderCategories(cats);
+                } catch (err) {
+                    status.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
+                }
+            };
+            document.body.appendChild(btn);
+        })();
     </script>
 </body>
 
