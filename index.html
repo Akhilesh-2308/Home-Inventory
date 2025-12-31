@@ -1667,7 +1667,7 @@
                             el.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.borderColor = 'rgba(59, 130, 246, 0.8)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)'; };
                             el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.borderColor = 'rgba(255, 255, 255, 0.5)'; this.style.boxShadow = 'none'; };
                             const img = document.createElement('img');
-                            img.src = API_BASE_URL + item.image_path;
+                            img.src = item.image_path;
                             img.alt = item.image_name || item.name;
                             img.style.width = '100%';
                             img.style.height = '180px';
@@ -1717,7 +1717,7 @@
                         panel.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.1)';
 
                         const big = document.createElement('img');
-                        big.src = API_BASE_URL + item.image_path;
+                        big.src = item.image_path;
                         big.style.width = '100%';
                         big.style.maxHeight = '520px';
                         big.style.objectFit = 'contain';
@@ -1848,42 +1848,237 @@
                         back.onclick = () => { renderCategories(cats); };
                         actions.appendChild(back);
                         panel.appendChild(actions);
+                        if (!item.image_path) return;
+                        const el = document.createElement('div');
+                        el.style.background = 'rgba(255, 255, 255, 0.9)';
+                        el.style.padding = '10px';
+                        el.style.borderRadius = '16px';
+                        el.style.display = 'flex';
+                        el.style.flexDirection = 'column';
+                        el.style.border = '2px solid rgba(255, 255, 255, 0.5)';
+                        el.style.backdropFilter = 'blur(16px)';
+                        el.style.transition = 'all 0.3s ease';
+                        el.style.cursor = 'pointer';
+                        el.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.borderColor = 'rgba(59, 130, 246, 0.8)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)'; };
+                        el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.borderColor = 'rgba(255, 255, 255, 0.5)'; this.style.boxShadow = 'none'; };
+                        const img = document.createElement('img');
+                        img.src = item.image_path;
+                        img.alt = item.image_name || item.name;
+                        img.style.width = '100%';
+                        img.style.height = '180px';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '12px';
+                        img.style.cursor = 'pointer';
+                        img.onclick = () => { showDetail(item); };
+                        const title = document.createElement('div');
+                        title.textContent = item.image_name || item.name;
+                        title.style.marginTop = '10px';
+                        title.style.fontWeight = '900';
+                        title.style.color = '#1d1d1d';
+                        title.style.fontSize = '14px';
+                        title.style.overflow = 'hidden';
+                        title.style.textOverflow = 'ellipsis';
+                        title.style.whiteSpace = 'nowrap';
+                        el.appendChild(img);
+                        el.appendChild(title);
+                        inner.appendChild(el);
+                    });
+                    const back = document.createElement('button');
+                    back.textContent = '⬅️ Back to categories';
+                    back.style.gridColumn = '1 / -1';
+                    back.style.padding = '12px 16px';
+                    back.style.marginTop = '12px';
+                    back.style.borderRadius = '12px';
+                    back.style.cursor = 'pointer';
+                    back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
+                    back.style.color = '#fff';
+                    back.style.fontWeight = '900';
+                    back.style.border = '2px solid rgba(255,255,255,0.4)';
+                    back.onclick = () => renderCategories(cats);
+                    inner.appendChild(back);
+                };
 
-                        inner.appendChild(panel);
-                        overlay.scrollTop = 0;
+                const showDetail = (item) => {
+                    inner.innerHTML = '';
+                    const panel = document.createElement('div');
+                    panel.style.background = 'rgba(255, 255, 255, 0.95)';
+                    panel.style.padding = '24px';
+                    panel.style.borderRadius = '20px';
+                    panel.style.maxWidth = '900px';
+                    panel.style.margin = '20px auto';
+                    panel.style.color = '#1d1d1d';
+                    panel.style.border = '2px solid rgba(255, 255, 255, 0.6)';
+                    panel.style.backdropFilter = 'blur(32px)';
+                    panel.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.1)';
+
+                    const big = document.createElement('img');
+                    big.src = item.image_path;
+                    big.style.width = '100%';
+                    big.style.maxHeight = '520px';
+                    big.style.objectFit = 'contain';
+                    big.style.borderRadius = '16px';
+                    big.style.marginBottom = '20px';
+                    big.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.15)';
+                    big.style.border = '1px solid rgba(255, 255, 255, 0.5)';
+                    panel.appendChild(big);
+
+                    const title = document.createElement('h2');
+                    title.textContent = item.image_name || item.name || 'Image';
+                    title.style.margin = '16px 0 12px';
+                    title.style.fontSize = '28px';
+                    title.style.fontWeight = '900';
+                    title.style.color = '#1d1d1d';
+                    panel.appendChild(title);
+
+                    const meta = document.createElement('div');
+                    meta.style.display = 'grid';
+                    meta.style.gridTemplateColumns = '1fr 1fr';
+                    meta.style.gap = '12px';
+                    meta.style.marginBottom = '16px';
+
+                    const mk = (label, val) => {
+                        const d = document.createElement('div');
+                        d.style.background = 'rgba(59, 130, 246, 0.05)';
+                        d.style.padding = '12px';
+                        d.style.borderRadius = '12px';
+                        d.style.border = '1px solid rgba(59, 130, 246, 0.08)';
+                        const l = document.createElement('div');
+                        l.textContent = label;
+                        l.style.fontSize = '13px';
+                        l.style.color = '#3b82f6';
+                        l.style.fontWeight = '900';
+                        l.style.textTransform = 'uppercase';
+                        const v = document.createElement('div');
+                        v.textContent = val || '-';
+                        v.style.marginTop = '6px';
+                        v.style.fontWeight = '900';
+                        v.style.color = '#1d1d1d';
+                        d.appendChild(l);
+                        d.appendChild(v);
+                        return d;
                     };
 
-                    const showImagesForCategory = async (categoryName) => {
+                    meta.appendChild(mk('Category', item.category));
+                    meta.appendChild(mk('Room', item.room));
+                    meta.appendChild(mk('Cupboard', item.cupboard));
+                    meta.appendChild(mk('Shelf', item.shelf));
+                    meta.appendChild(mk('Loft', item.loft));
+                    meta.appendChild(mk('File', item.image_name || item.name));
+                    panel.appendChild(meta);
+
+                    if (item.inside_items) {
+                        const ins = document.createElement('div');
+                        ins.style.marginTop = '16px';
+                        ins.style.padding = '16px';
+                        ins.style.background = 'rgba(59, 130, 246, 0.05)';
+                        ins.style.borderRadius = '12px';
+                        ins.style.border = '1px solid rgba(59, 130, 246, 0.08)';
+                        const lbl = document.createElement('div');
+                        lbl.textContent = 'Inside Items';
+                        lbl.style.fontWeight = '900';
+                        lbl.style.color = '#3b82f6';
+                        lbl.style.marginBottom = '10px';
+                        lbl.style.fontSize = '14px';
+                        lbl.style.textTransform = 'uppercase';
+                        ins.appendChild(lbl);
+                        const ul = document.createElement('ul');
+                        ul.style.paddingLeft = '20px';
+                        ul.style.listStyle = 'none';
+                        String(item.inside_items).split('\n').forEach(line => {
+                            const t = line && line.trim();
+                            if (t) {
+                                const li = document.createElement('li');
+                                li.textContent = '✓ ' + t.replace(/^[-.\s]+/, '');
+                                li.style.color = '#1d1d1d';
+                                li.style.fontWeight = '600';
+                                li.style.marginBottom = '4px';
+                                ul.appendChild(li);
+                            }
+                        });
+                        ins.appendChild(ul);
+                        panel.appendChild(ins);
+                    }
+
+                    if (item.notes) {
+                        const notes = document.createElement('div');
+                        notes.style.marginTop = '16px';
+                        notes.style.padding = '16px';
+                        notes.style.background = 'rgba(139, 92, 246, 0.05)';
+                        notes.style.borderRadius = '12px';
+                        notes.style.border = '1px solid rgba(139, 92, 246, 0.08)';
+                        const lbl = document.createElement('div');
+                        lbl.textContent = 'Notes';
+                        lbl.style.fontWeight = '900';
+                        lbl.style.color = '#8b5cf6';
+                        lbl.style.marginBottom = '8px';
+                        lbl.style.fontSize = '14px';
+                        lbl.style.textTransform = 'uppercase';
+                        notes.appendChild(lbl);
+                        const p = document.createElement('div');
+                        p.textContent = item.notes;
+                        p.style.whiteSpace = 'pre-wrap';
+                        p.style.color = '#1d1d1d';
+                        p.style.fontWeight = '600';
+                        notes.appendChild(p);
+                        panel.appendChild(notes);
+                    }
+
+                    const actions = document.createElement('div');
+                    actions.style.display = 'flex';
+                    actions.style.gap = '12px';
+                    actions.style.marginTop = '20px';
+                    const back = document.createElement('button');
+                    back.textContent = '⬅️ Back';
+                    back.style.padding = '14px 20px';
+                    back.style.borderRadius = '14px';
+                    back.style.cursor = 'pointer';
+                    back.style.background = 'linear-gradient(135deg,#3b82f6,#8b5cf6)';
+                    back.style.color = '#fff';
+                    back.style.fontWeight = '900';
+                    back.style.border = '2px solid rgba(255,255,255,0.4)';
+                    back.style.fontSize = '14px';
+                    back.style.transition = 'all 0.3s ease';
+                    back.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.4)'; };
+                    back.onmouseout = function () { this.style.transform = 'scale(1)'; };
+                    back.onclick = () => { renderCategories(cats); };
+                    actions.appendChild(back);
+                    panel.appendChild(actions);
+
+                    inner.appendChild(panel);
+                    overlay.scrollTop = 0;
+                };
+
+                const showImagesForCategory = async (categoryName) => {
+                    inner.innerHTML = '';
+                    const load = document.createElement('div');
+                    load.textContent = 'Loading images for ' + categoryName + '...';
+                    load.style.gridColumn = '1 / -1';
+                    load.style.color = '#1d1d1d';
+                    load.style.fontWeight = '900';
+                    inner.appendChild(load);
+                    try {
+                        const resp = await fetch(`${API_BASE_URL}/items/by-category/${encodeURIComponent(categoryName)}`, { headers: getAuthHeaders(false) });
+                        const data = await resp.json();
+                        // filter only items that have images (Supabase URLs start with https://)
+                        const withImages = Array.isArray(data) ? data.filter(it => it && it.image_path && it.image_path.startsWith('https://')) : [];
+                        renderImages(withImages, data);
+                    } catch (err) {
                         inner.innerHTML = '';
-                        const load = document.createElement('div');
-                        load.textContent = 'Loading images for ' + categoryName + '...';
-                        load.style.gridColumn = '1 / -1';
-                        load.style.color = '#1d1d1d';
-                        load.style.fontWeight = '900';
-                        inner.appendChild(load);
-                        try {
-                            const resp = await fetch(`${API_BASE_URL}/items/by-category/${encodeURIComponent(categoryName)}`, { headers: getAuthHeaders(false) });
-                            const data = await resp.json();
-                            // filter only items that have images
-                            const withImages = Array.isArray(data) ? data.filter(it => it && it.image_path) : [];
-                            renderImages(withImages, data);
-                        } catch (err) {
-                            inner.innerHTML = '';
-                            const errEl = document.createElement('div');
-                            errEl.textContent = 'Failed to load images for category.';
-                            errEl.style.color = '#1d1d1d';
-                            inner.appendChild(errEl);
-                        }
-                    };
+                        const errEl = document.createElement('div');
+                        errEl.textContent = 'Failed to load images for category.';
+                        errEl.style.color = '#1d1d1d';
+                        inner.appendChild(errEl);
+                    }
+                };
 
-                    // initial render: show categories
-                    renderCategories(cats);
-                } catch (err) {
-                    status.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
-                }
-            };
-            document.body.appendChild(btn);
-        })();
+                // initial render: show categories
+                renderCategories(cats);
+            } catch (err) {
+                status.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
+            }
+        };
+        document.body.appendChild(btn);
+        }) ();
     </script>
 </body>
 
