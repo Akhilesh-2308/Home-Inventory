@@ -1,3 +1,11 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+
+import os
+print("DATABASE_URL FROM ENV =", os.getenv("DATABASE_URL"))
+
+
 from fastapi import FastAPI, Depends, HTTPException, Query, Form
 from fastapi import UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,8 +24,13 @@ from pathlib import Path as _Path
 # project base directory
 BASE_DIR = _Path(__file__).resolve().parent
 
-# Create all tables
-Base.metadata.create_all(bind=engine)
+# Create all tables (with error handling for network issues)
+try:
+    Base.metadata.create_all(bind=engine)
+    print("✅ Database tables created/verified successfully")
+except Exception as db_error:
+    print(f"⚠️  Warning: Could not connect to database: {db_error}")
+    print("    Continuing without database for now (network/DNS issue)")
 
 app = FastAPI(title="Home Inventory System", version="1.0.0")
 
@@ -62,24 +75,34 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.post("/auth/signup", response_model=schemas.UserOut)
 def signup(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing = crud.get_user_by_email(db, user_in.email)
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
     try:
+        existing = crud.get_user_by_email(db, user_in.email)
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
         user = crud.create_user(db, user_in)
         return user
+    except HTTPException:
+        raise
     except ValueError as ve:
-        # validation errors from crud (e.g. password too long) -> return 400 with message
         raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        if "could not translate host name" in str(e) or "Name or service not known" in str(e):
+            raise HTTPException(status_code=503, detail="Database connection unavailable - check network connectivity to Supabase")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 @app.post("/auth/login", response_model=schemas.Token)
 def login(user_login: schemas.UserLogin, db: Session = Depends(get_db)):
-    user = crud.authenticate_user(db, user_login.email, user_login.password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Incorrect email or password")
-    access_token = auth.create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    try:
+        user = crud.authenticate_user(db, user_login.email, user_login.password)
+        if not user:
+            raise HTTPException(status_code=401, detail="Incorrect email or password")
+        access_token = auth.create_access_token(data={"sub": user.email})
+        return {"access_token": access_token, "token_type": "bearer"}
+    except Exception as e:
+        if "could not translate host name" in str(e) or "Name or service not known" in str(e):
+            raise HTTPException(status_code=503, detail="Database connection unavailable - check network connectivity to Supabase")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 # Fix favicon error
 @app.get("/favicon.ico")
