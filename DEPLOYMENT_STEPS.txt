@@ -1,0 +1,119 @@
+Home Inventory — Step-by-step free deployment and storage guide
+
+Overview
+- Frontend: Vercel (free static hosting)
+- Database & Object Storage: Supabase (free tier: Postgres + Storage)
+- Backend (FastAPI): Fly.io or Railway (both have free tiers/allocations)
+
+Why this stack
+- Vercel: easiest static site deploy for index.html.
+- Supabase: provides a managed Postgres and object storage (recommended for images), both with free tiers.
+- Fly.io / Railway: small, persistent process hosting for Python apps with free allocations—suitable for running FastAPI with uvicorn.
+
+High-level steps
+1) Prepare repository
+   - Commit and push your project to GitHub.
+   - Ensure repository contains main.py, requirements.txt, static/, and index.html at project root.
+
+2) Create a Supabase project (data + storage)
+   a) Go to https://app.supabase.com and sign up (free tier available).
+   b) Create a new project; note the Postgres connection string (DATABASE_URL) and the Supabase API keys.
+   c) In Supabase, open "Storage" and create a bucket uploads (public or private depending on your needs).
+   d) In "Settings → API" get the anon and service_role keys (store them securely).
+
+   Where data/images will be saved when using Supabase:
+   - Database tables (users/items/rooms) are saved in Supabase Postgres.
+   - Images are uploaded to the uploads Storage bucket and served via public URLs (or signed URLs if private).
+
+3) Update or confirm your backend configuration
+   - Your app currently stores DB connection in `database.py`. In production set `DATABASE_URL` to the Supabase Postgres URL.
+   - For image storage options:
+     Option A (recommended): Use Supabase Storage — modify upload endpoint to use supabase-py or REST API to put files into the uploads bucket and save returned public URL to the DB.
+     Option B: Use S3-compatible storage (AWS S3 or DigitalOcean Spaces) — your current code supports S3 if you set AWS env vars (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET, optionally AWS_REGION).
+     Option C (not recommended for many hosts): Save files to the server filesystem under static/uploads — this will work but is often ephemeral on cloud hosts.
+
+4) Local testing (before deploy)
+   - Install dependencies:
+     python -m pip install -r requirements.txt
+   - Start the app locally:
+     uvicorn main:app --reload --host 0.0.0.0 --port 8001
+   - Create a local .env or set environment variables for testing:
+     - DATABASE_URL → local Postgres or Supabase testing DB
+     - SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES → for auth
+     - If using S3: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET
+   - Verify upload endpoints: upload an image in the UI and confirm DB row contains image_path and that the image is reachable.
+
+5) Deploy backend to Fly.io (example)
+   a) Install flyctl: https://fly.io/docs/hands-on/install-flyctl/
+   b) Login and init:
+     flyctl auth login
+     flyctl launch --name home-inventory --region <region> --no-deploy
+   c) Create a Dockerfile or rely on Fly's Python buildpack. Minimal Dockerfile example:
+     FROM python:3.11-slim
+     WORKDIR /app
+     COPY . /app
+     RUN pip install -r requirements.txt
+     CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT:-8080}"]
+   d) Set environment variables on Fly:
+     flyctl secrets set DATABASE_URL="<supabase_database_url>" SECRET_KEY="<secret>" ...
+   e) Deploy:
+     flyctl deploy
+
+   (Alternative providers: Railway or Render — they also offer free tiers/credits. Process is similar: connect GitHub repo, set start command `uvicorn main:app --host 0.0.0.0 --port $PORT`, add environment variables.)
+
+6) Configure Supabase storage for uploads
+   - If using Supabase Storage: in your backend set up code to upload POSTed file bytes to Supabase Storage and get a public URL, then save the URL in your Postgres items table.
+   - Example approach (Python pseudocode):
+     from supabase import create_client
+     sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+     res = sb.storage.from_('uploads').upload(file_path, file_bytes)
+     public_url = sb.storage.from_('uploads').get_public_url(file_path)
+
+7) Deploy frontend to Vercel (static)
+   - Sign up at https://vercel.com (free hobby tier available).
+   - Import your GitHub repository as a new project.
+   - Framework Preset: select "Other" or "Static Site".
+   - Build & Output Settings: If index.html is at repo root and no build step is needed, set Output Directory to `/`.
+   - Set Environment Variables in Vercel (optional): API_BASE_URL = https://<your-backend>.fly.dev
+   - Deploy — Vercel will publish a domain like your-project.vercel.app.
+
+8) Configure the frontend to call the backend
+   - In index.html you likely have a hardcoded API_BASE_URL for local testing. Replace it for production or add a small script to read an environment-injected value at build time.
+   - Simpler approach: add a small JS snippet in index.html that reads window.__API_BASE__ (injected at build) or have Vercel replace a string during the deploy using a tiny build step.
+
+9) Environment variable checklist (set these on backend host)
+   - DATABASE_URL = Supabase Postgres connection string
+   - SECRET_KEY = JWT secret
+   - ACCESS_TOKEN_EXPIRE_MINUTES = e.g., 30
+   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET (if using S3)
+   - SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (if using Supabase Storage uploads)
+
+10) Where data and images will be saved (summary)
+   - Relational data (users, items, rooms): Supabase Postgres (persistent, managed, backups).
+   - Images:
+     - Supabase Storage bucket (recommended): persistent, served via stable URLs.
+     - AWS S3 / Spaces (if you configure S3 credentials): persistent.
+     - Local static/uploads: not persistent on many cloud hosts (use only for small personal setups on VMs with attached persistent disk).
+
+11) Quick verification after deployment
+   - From a browser, open Vercel URL, sign up / log in, create an item and upload an image.
+   - Check Supabase dashboard → Storage to confirm the file exists and Postgres to confirm rows.
+   - Check API logs on Fly/Railway if uploads or DB writes fail.
+
+12) Optional next steps (recommended)
+   - Add vercel.json to proxy /api/* to your backend (if you want same origin without CORS changes).
+   - Add CI to automatically run tests on pushes and deploy preview sites.
+   - Migrate upload code to use supabase-py so you rely on one managed provider for DB+storage.
+
+Troubleshooting notes
+- If uploads fail with permissions, check Supabase bucket policy or S3 bucket ACLs and credentials.
+- If data writes fail, ensure DATABASE_URL is correct and that your backend can reach the DB host (some providers restrict networks).
+- Avoid storing uploaded files on ephemeral filesystems if you want persistence—use Supabase or S3.
+
+If you want, I can:
+- Add a Procfile or Dockerfile and fly.toml for Fly.io deployment.
+- Provide a small patch to your backend to upload directly to Supabase Storage (example code + dependencies).
+- Add vercel.json to rewrite or proxy API calls to the backend.
+
+---
+End of instructions.
