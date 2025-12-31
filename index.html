@@ -731,79 +731,7 @@
                     'Books': 'from-indigo-500 to-purple-500',
                     'Toys': 'from-cyan-500 to-blue-500',
                     'Travel Items': 'from-blue-600 to-teal-500',
-                    'Car Accessories': 'from-amber-600 to-orange-500',
-                };
-                return colors[category] || 'from-gray-500 to-gray-600';
-            };
-
-            const getCategoryIcon = (category) => {
-                const icons = {
-                    'Luggage': '🧳',
-                    'Electronics': '💻',
-                    'Document': '📄',
-                    'Clothing': '👕',
-                    'Kitchen': '🍳',
-                    'Tools': '🔧',
-                    'Books': '📚',
-                    'Toys': '🎮',
-                    'Travel Items': '✈️',
-                                    < div className = "flex-1" >
-                                        <p className="font-black text-xs text-purple-300 uppercase tracking-wider mb-1 drop-shadow-md">📍 Location</p>
-                                        <p className="text-lg font-bold text-white/90">{item.room}</p>
-                                    </div >
-                                </div >
-
-                {(item.cupboard || item.shelf || item.loft) && (
-                    <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)' }}>
-                        <Archive size={24} className="text-pink-300 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                            <p className="font-black text-xs text-pink-300 uppercase tracking-wider mb-1 drop-shadow-md">🗄️ Storage</p>
-                            <p className="text-base font-bold text-white/90">
-                                {item.cupboard && <span className="font-black">{item.cupboard}</span>}
-                                {(item.cupboard && (item.shelf || item.loft)) && <span className="text-white/40 mx-2">•</span>}
-                                {item.shelf && <span className="font-black">{item.shelf}</span>}
-                                {(item.shelf && item.loft) && <span className="text-white/40 mx-2">•</span>}
-                                {item.loft && <span className="font-black">{item.loft}</span>}
-                            </p>
-                        </div>
-                    </div>
-                )
-        }
-
-        {/* INSIDE ITEMS and Notes */ }
-        {
-            (item.inside_items || item.notes) && (
-                <div className="pt-4 border-t border-white/20">
-                    {item.inside_items && (
-                        <div className="mb-3">
-                            <p className="font-black text-xs text-white/70 uppercase tracking-wider mb-2 drop-shadow-md">📦 Inside Items</p>
-                            <ul className="inside-items-list text-white/80 text-sm">
-                                {String(item.inside_items).split('\n').map((line, idx) => {
-                                    const trimmed = (line || '').trim();
-                                    if (!trimmed) return null;
-                                    const display = trimmed.replace(/^[-\.\s]+/, '');
-                                    return <li key={idx} className="flex items-start gap-2"><span className="mr-2 text-pink-400">✓</span><span>{display}</span></li>;
-                                })}
-                            </ul>
-                        </div>
-                    )}
-
-                    {item.notes && (
-                        <p className="text-sm text-white/70 italic leading-relaxed p-3 rounded-xl border border-white/20 backdrop-blur-lg" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>{item.notes}</p>
-                    )}
-                </div>
-            )
-        }
-                            </div >
-                        </div >
-                    </div >
-                    );
-
-        // If user is not authenticated, show a login gate page that links to auth pages
-        if (!isAuthenticated) {
-            return (
-                <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-                    {/* Animated floating glass orbs */}
+                    {/* Animated floating glass orbs */ }
                     <div className="absolute top-20 left-20 w-40 h-40 glass-effect-colored rounded-full opacity-30 animate-float" style={{ background: 'rgba(236, 72, 153, 0.4)' }}></div>
                     <div className="absolute bottom-32 right-32 w-52 h-52 glass-effect-colored rounded-full opacity-25 animate-float" style={{ background: 'rgba(139, 92, 246, 0.4)', animationDelay: '1s' }}></div>
                     <div className="absolute top-1/3 right-20 w-32 h-32 glass-effect-colored rounded-full opacity-20 animate-float" style={{ background: 'rgba(59, 130, 246, 0.3)', animationDelay: '2s' }}></div>
@@ -834,7 +762,7 @@
                         </div>
                         <p className="text-sm text-white/60 mt-8 font-semibold drop-shadow-md">New here? Sign up. Already have an account? Sign in.</p>
                     </div>
-                </div>
+                </div >
             );
         }
 
