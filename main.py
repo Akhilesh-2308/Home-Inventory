@@ -1,11 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
-
-
 import os
-print("DATABASE_URL FROM ENV =", os.getenv("DATABASE_URL"))
-
-
 from fastapi import FastAPI, Depends, HTTPException, Query, Form
 from fastapi import UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +15,7 @@ from typing import Optional
 import shutil
 from uuid import uuid4
 from pathlib import Path as _Path
+from supabase_client import supabase
 
 # project base directory
 BASE_DIR = _Path(__file__).resolve().parent
@@ -184,61 +180,60 @@ def read_item(item_id: int, db: Session = Depends(get_db), current_user: models.
     return db_item
 
 @app.post("/items/{item_id}/upload-image", response_model=schemas.ItemOut)
-def upload_item_image(item_id: int, file: UploadFile = File(...), image_name: str | None = Form(None), db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    """Upload an image for an existing item. Stores the file in `static/uploads` and updates DB record."""
-    UPLOAD_DIR = BASE_DIR / "static" / "uploads"
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+def upload_item_image(
+    item_id: int,
+    file: UploadFile = File(...),
+    image_name: str | None = Form(None),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    """
+    Upload an image for an existing item.
+    Stores the file in Supabase Storage (bucket: uploads)
+    and saves the public URL in the database.
+    """
 
-    # create unique filename and save; choose storage backend depending on env
+    # 1️⃣ Generate safe unique filename
     original_name = image_name or file.filename or "image"
-    # preserve the real file extension from the uploaded file
-    ext = _Path(file.filename or '').suffix
+    ext = _Path(file.filename or "").suffix
     filename = f"{uuid4().hex}{ext}"
-    dest_path = UPLOAD_DIR / filename
 
-    # If AWS S3 is configured via env, upload there and set image_path to public URL
-    import os
-    s3_bucket = os.getenv('AWS_S3_BUCKET')
-    if s3_bucket:
-        try:
-            import boto3
-            s3 = boto3.client('s3')
-            # upload file object
-            file.file.seek(0)
-            s3.upload_fileobj(file.file, s3_bucket, f"uploads/{filename}", ExtraArgs={'ACL':'public-read', 'ContentType': file.content_type or 'application/octet-stream'})
-            # build public URL (assuming standard S3 public bucket)
-            region = os.getenv('AWS_REGION')
-            if region:
-                image_url = f"https://{s3_bucket}.s3.{region}.amazonaws.com/uploads/{filename}"
-            else:
-                image_url = f"https://{s3_bucket}.s3.amazonaws.com/uploads/{filename}"
-            image_path = image_url
-        finally:
-            file.file.close()
-    else:
-        try:
-            with open(dest_path, "wb") as out_file:
-                shutil.copyfileobj(file.file, out_file)
-        finally:
-            file.file.close()
-        # store a path relative to static so it can be served at /static/uploads/<filename>
-        image_path = f"/static/uploads/{filename}"
+    # 2️⃣ Read file bytes
+    file_bytes = file.file.read()
+    file.file.close()
 
-    # attach image only if the item belongs to current_user
-    item = crud.attach_image_to_item(db, item_id, original_name, image_path, owner_id=current_user.id)
+    # 3️⃣ Upload to Supabase Storage
+    result = supabase.storage.from_("uploads").upload(
+        path=filename,
+        file=file_bytes,
+        file_options={
+            "content-type": file.content_type or "application/octet-stream"
+        },
+    )
+
+    if result.get("error"):
+        raise HTTPException(
+            status_code=500,
+            detail=f"Supabase upload failed: {result['error']}",
+        )
+
+    # 4️⃣ Get public URL
+    public_url = supabase.storage.from_("uploads").get_public_url(filename)
+
+    # 5️⃣ Save image info in DB (ownership enforced)
+    item = crud.attach_image_to_item(
+        db=db,
+        item_id=item_id,
+        image_name=original_name,
+        image_path=public_url,
+        owner_id=current_user.id,
+    )
+
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
+
     return item
-@app.put("/items/{item_id}", response_model=schemas.ItemOut)
-def update_item(item_id: int, item: schemas.ItemUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    # ensure user owns the item
-    existing = crud.get_item(db, item_id, owner_id=current_user.id)
-    if not existing:
-        raise HTTPException(status_code=404, detail="Item not found")
-    db_item = crud.update_item(db, item_id, item)
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return db_item
+
 
 @app.delete("/items/{item_id}")
 def delete_item(item_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
