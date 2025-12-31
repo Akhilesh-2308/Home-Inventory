@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,32 +15,86 @@
         }
 
         @keyframes slide-in {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes bounce-in {
-            0% { transform: scale(0.95); opacity: 0; }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-        @keyframes glow-shift {
-            0%, 100% { filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.4)); }
-            50% { filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.5)); }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
-        .animate-slide-in { animation: slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .animate-fade-in { animation: fade-in 0.4s ease-out; }
-        .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        .animate-glow { animation: glow-shift 3s ease-in-out infinite; }
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+
+        @keyframes glow-shift {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.5));
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.4s ease-out;
+        }
+
+        .animate-bounce-in {
+            animation: bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-glow {
+            animation: glow-shift 3s ease-in-out infinite;
+        }
 
         .glass-effect {
             background: rgba(255, 255, 255, 0.25);
@@ -67,8 +122,8 @@
             position: fixed;
             inset: 0;
             background: radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
         }
@@ -93,28 +148,32 @@
             width: 10px;
             height: 10px;
         }
+
         ::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.05);
         }
+
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #ec4899, #8b5cf6);
             border-radius: 5px;
             border: 2px solid rgba(255, 255, 255, 0.1);
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, #db2777, #7c3aed);
         }
     </style>
 </head>
+
 <body>
     <div id="root"></div>
     <!-- Debug: show JS runtime errors in-page to help diagnose blank screen -->
     <div id="__error_overlay__" style="position:fixed;inset:0;pointer-events:none;z-index:99999;">
     </div>
     <script>
-        (function(){
-            function showError(msg){
-                try{
+        (function () {
+            function showError(msg) {
+                try {
                     var overlay = document.getElementById('__error_overlay__');
                     overlay.innerHTML = '';
                     var box = document.createElement('div');
@@ -138,14 +197,14 @@
                     var close = document.createElement('button');
                     close.textContent = 'Close';
                     close.style.marginTop = '8px';
-                    close.onclick = function(){ overlay.innerHTML = ''; };
+                    close.onclick = function () { overlay.innerHTML = ''; };
                     box.appendChild(pre);
                     box.appendChild(close);
                     overlay.appendChild(box);
-                }catch(e){ console.error('showError failed', e); }
+                } catch (e) { console.error('showError failed', e); }
             }
 
-            window.addEventListener('error', function(e){
+            window.addEventListener('error', function (e) {
                 var msg = 'Error: ' + (e && e.message ? e.message : String(e));
                 if (e && e.filename) msg += '\nFile: ' + e.filename + ':' + e.lineno + ':' + e.colno;
                 if (e && e.error && e.error.stack) msg += '\nStack:\n' + e.error.stack;
@@ -153,7 +212,7 @@
                 console.error(e.error || e);
             });
 
-            window.addEventListener('unhandledrejection', function(ev){
+            window.addEventListener('unhandledrejection', function (ev) {
                 var reason = ev && ev.reason ? ev.reason : ev;
                 var msg = 'Unhandled Rejection: ' + (reason && reason.message ? reason.message : String(reason));
                 if (reason && reason.stack) msg += '\nStack:\n' + reason.stack;
@@ -162,12 +221,12 @@
             });
 
             // Optional: catch synchronous exceptions from React render
-            if (window.ReactDOM && typeof window.ReactDOM.render === 'function'){
+            if (window.ReactDOM && typeof window.ReactDOM.render === 'function') {
                 var oldRender = window.ReactDOM.render;
-                window.ReactDOM.render = function(){
-                    try{
+                window.ReactDOM.render = function () {
+                    try {
                         return oldRender.apply(this, arguments);
-                    }catch(err){
+                    } catch (err) {
                         showError('React render error:\n' + (err && err.stack ? err.stack : String(err)));
                         throw err;
                     }
@@ -175,10 +234,10 @@
             }
         })();
     </script>
-    
+
     <script type="text/babel">
         const { useState, useEffect } = React;
-        
+
         // Icons
         const Search = ({ size = 24, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -265,7 +324,7 @@
             </svg>
         );
 
-        const API_BASE_URL = 'http://127.0.0.1:8001';
+        const API_BASE_URL = "https://home-inventory-production.up.railway.app";
 
         const getAuthHeaders = (isJson = true) => {
             const token = localStorage.getItem('access_token');
@@ -351,7 +410,7 @@
 
             // If a focus param is present in the URL, navigate to All Items and scroll/highlight the item
             useEffect(() => {
-                try{
+                try {
                     const params = new URLSearchParams(window.location.search);
                     const focus = params.get('focus');
                     if (!focus) return;
@@ -368,16 +427,16 @@
                             el.style.boxShadow = '0 0 0 4px rgba(99,102,241,0.35)';
                             setTimeout(() => { el.style.boxShadow = old; }, 3000);
                             // open edit modal for the focused item (if present in items array)
-                            try{
+                            try {
                                 const found = Array.isArray(items) ? items.find(i => String(i.id) === String(focus)) : null;
                                 if (found) {
                                     setEditingItem(found);
                                     setShowAddItem(true);
                                 }
-                            }catch(e){ console.warn('could not open edit modal for focus', e); }
+                            } catch (e) { console.warn('could not open edit modal for focus', e); }
                         }
                     }, 300);
-                }catch(e){ console.warn('focus handling failed', e); }
+                } catch (e) { console.warn('focus handling failed', e); }
             }, [items]);
 
             const calculateStats = () => {
@@ -527,11 +586,11 @@
                     if (response.ok) {
                         const created = await response.json();
                         // if an image was selected, upload it for the created item
-                                if (imageFile) {
+                        if (imageFile) {
                             try {
                                 const form = new FormData();
                                 form.append('file', imageFile, imageFile.name);
-                                        if (imageName) form.append('image_name', imageName);
+                                if (imageName) form.append('image_name', imageName);
                                 const up = await fetch(`${API_BASE_URL}/items/${created.id}/upload-image`, {
                                     method: 'POST',
                                     headers: getAuthHeaders(false),
@@ -692,7 +751,7 @@
             };
 
             const ItemCard = ({ item }) => (
-                <div data-item-id={item.id} className="group relative rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden animate-bounce-in hover:scale-105 backdrop-blur-xl" style={{background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)'}}>
+                <div data-item-id={item.id} className="group relative rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden animate-bounce-in hover:scale-105 backdrop-blur-xl" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>
                     <div className={`h-1.5 bg-gradient-to-r ${getCategoryColor(item.category)}`}></div>
                     <div className="p-6">
                         <div className="flex justify-between items-start mb-4">
@@ -724,31 +783,31 @@
                                 <button
                                     onClick={() => startEditItem(item)}
                                     className="p-3 text-blue-300 rounded-xl transition-all hover:scale-125 shadow-lg font-black backdrop-blur-lg hover:shadow-xl"
-                                    style={{background: 'rgba(59, 130, 246, 0.4)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                    style={{ background: 'rgba(59, 130, 246, 0.4)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                 >
                                     <Edit2 size={20} />
                                 </button>
                                 <button
                                     onClick={() => handleDeleteItem(item.id)}
                                     className="p-3 text-red-300 rounded-xl transition-all hover:scale-125 shadow-lg font-black backdrop-blur-lg hover:shadow-xl"
-                                    style={{background: 'rgba(239, 68, 68, 0.4)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                    style={{ background: 'rgba(239, 68, 68, 0.4)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                 >
                                     <Trash2 size={20} />
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-4 mt-6">
-                            <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)'}}>
+                            <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)' }}>
                                 <MapPin size={24} className="text-purple-300 mt-0.5 flex-shrink-0" />
                                 <div className="flex-1">
                                     <p className="font-black text-xs text-purple-300 uppercase tracking-wider mb-1 drop-shadow-md">📍 Location</p>
                                     <p className="text-lg font-bold text-white/90">{item.room}</p>
                                 </div>
                             </div>
-                            
+
                             {(item.cupboard || item.shelf || item.loft) && (
-                                <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)'}}>
+                                <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all shadow-md backdrop-blur-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)' }}>
                                     <Archive size={24} className="text-pink-300 mt-0.5 flex-shrink-0" />
                                     <div className="flex-1">
                                         <p className="font-black text-xs text-pink-300 uppercase tracking-wider mb-1 drop-shadow-md">🗄️ Storage</p>
@@ -762,7 +821,7 @@
                                     </div>
                                 </div>
                             )}
-                            
+
                             {/* INSIDE ITEMS and Notes */}
                             {(item.inside_items || item.notes) && (
                                 <div className="pt-4 border-t border-white/20">
@@ -781,7 +840,7 @@
                                     )}
 
                                     {item.notes && (
-                                        <p className="text-sm text-white/70 italic leading-relaxed p-3 rounded-xl border border-white/20 backdrop-blur-lg" style={{background: 'rgba(255, 255, 255, 0.1)'}}>{item.notes}</p>
+                                        <p className="text-sm text-white/70 italic leading-relaxed p-3 rounded-xl border border-white/20 backdrop-blur-lg" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>{item.notes}</p>
                                     )}
                                 </div>
                             )}
@@ -795,11 +854,11 @@
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
                         {/* Animated floating glass orbs */}
-                        <div className="absolute top-20 left-20 w-40 h-40 glass-effect-colored rounded-full opacity-30 animate-float" style={{background: 'rgba(236, 72, 153, 0.4)'}}></div>
-                        <div className="absolute bottom-32 right-32 w-52 h-52 glass-effect-colored rounded-full opacity-25 animate-float" style={{background: 'rgba(139, 92, 246, 0.4)', animationDelay: '1s'}}></div>
-                        <div className="absolute top-1/3 right-20 w-32 h-32 glass-effect-colored rounded-full opacity-20 animate-float" style={{background: 'rgba(59, 130, 246, 0.3)', animationDelay: '2s'}}></div>
-                        
-                        <div className="glass-effect-colored rounded-3xl p-16 max-w-2xl w-full text-center animate-bounce-in relative z-10" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(59, 130, 246, 0.15) 100%)'}}>
+                        <div className="absolute top-20 left-20 w-40 h-40 glass-effect-colored rounded-full opacity-30 animate-float" style={{ background: 'rgba(236, 72, 153, 0.4)' }}></div>
+                        <div className="absolute bottom-32 right-32 w-52 h-52 glass-effect-colored rounded-full opacity-25 animate-float" style={{ background: 'rgba(139, 92, 246, 0.4)', animationDelay: '1s' }}></div>
+                        <div className="absolute top-1/3 right-20 w-32 h-32 glass-effect-colored rounded-full opacity-20 animate-float" style={{ background: 'rgba(59, 130, 246, 0.3)', animationDelay: '2s' }}></div>
+
+                        <div className="glass-effect-colored rounded-3xl p-16 max-w-2xl w-full text-center animate-bounce-in relative z-10" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(59, 130, 246, 0.15) 100%)' }}>
                             <div className="flex items-center justify-center mb-8">
                                 <a href="/" className="inline-flex items-center gap-4 text-center no-underline cursor-pointer hover:opacity-90 transition-opacity group">
                                     <div className="relative group animate-float">
@@ -815,11 +874,11 @@
                             <p className="text-white/70 mb-10 text-lg font-semibold drop-shadow-md">Organize with liquid glass style</p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <a href={`/auth/login-page?next=${nextParam}`} className="px-8 py-4 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-lg"
-                                    style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)'}}>
+                                    style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.8) 0%, rgba(139, 92, 246, 0.8) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>
                                     Sign In ✨
                                 </a>
                                 <a href={`/auth/signup-page?next=${nextParam}`} className="px-8 py-4 text-white rounded-2xl font-black text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-lg"
-                                    style={{background: 'rgba(59, 130, 246, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.4)'}}>
+                                    style={{ background: 'rgba(59, 130, 246, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.4)' }}>
                                     Create Account 🚀
                                 </a>
                             </div>
@@ -832,16 +891,15 @@
             return (
                 <div className="min-h-screen">
                     {notification && (
-                        <div className={`fixed top-6 right-6 px-8 py-4 rounded-2xl shadow-xl z-50 animate-slide-in font-black text-lg border ${
-                            notification.type === 'success' 
-                                ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white border-emerald-200 shadow-emerald-500/50' 
+                        <div className={`fixed top-6 right-6 px-8 py-4 rounded-2xl shadow-xl z-50 animate-slide-in font-black text-lg border ${notification.type === 'success'
+                                ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white border-emerald-200 shadow-emerald-500/50'
                                 : 'bg-gradient-to-r from-red-400 to-pink-500 text-white border-red-200 shadow-red-500/50'
-                        }`}>                                
+                            }`}>
                             {notification.type === 'success' ? '✓ ' : '⚠ '}{notification.message}
                         </div>
                     )}
 
-                    <div className="glass-effect-colored sticky top-0 z-40 shadow-lg" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', backdropFilter: 'blur(40px)'}}>
+                    <div className="glass-effect-colored sticky top-0 z-40 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', backdropFilter: 'blur(40px)' }}>
                         <div className="max-w-7xl mx-auto px-6 py-6">
                             <div className="flex items-center justify-between flex-wrap gap-6">
                                 <a href="/" className="flex items-center gap-4 cursor-pointer hover:opacity-90 transition-opacity group" >
@@ -864,7 +922,7 @@
                                             <button
                                                 onClick={() => setShowAddItem(true)}
                                                 className="group relative flex items-center gap-3 text-white px-8 py-4 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg overflow-hidden shadow-lg"
-                                                style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)'}}
+                                                style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
                                             >
                                                 <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                                 <Plus size={26} className="relative z-10" />
@@ -878,7 +936,7 @@
                                                     showNotification('See you soon!', 'success');
                                                 }}
                                                 className="px-6 py-4 text-white rounded-2xl font-black hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg backdrop-blur-lg"
-                                                style={{background: 'rgba(239, 68, 68, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                                style={{ background: 'rgba(239, 68, 68, 0.6)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                             >
                                                 Logout
                                             </button>
@@ -886,9 +944,9 @@
                                     ) : (
                                         <div className="flex items-center gap-3">
                                             <a href={`/auth/login-page?next=${nextParam}`} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-2xl font-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 backdrop-blur-lg"
-                                                style={{background: 'rgba(255, 255, 255, 0.2)', border: '1.5px solid rgba(255, 255, 255, 0.3)'}}>Sign In</a>
+                                                style={{ background: 'rgba(255, 255, 255, 0.2)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>Sign In</a>
                                             <a href={`/auth/signup-page?next=${nextParam}`} className="inline-flex items-center gap-2 text-white px-6 py-3 rounded-2xl font-black transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 backdrop-blur-lg"
-                                                style={{background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.7) 0%, rgba(59, 130, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)'}}>Sign Up</a>
+                                                style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.7) 0%, rgba(59, 130, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}>Sign Up</a>
                                         </div>
                                     )}
                                 </div>
@@ -896,19 +954,19 @@
 
                             {/* Stats */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}>
+                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
                                     <p className="text-sm font-black text-white/70">📦 Items</p>
                                     <p className="text-4xl font-black mt-2 bg-gradient-to-r from-pink-300 to-pink-200 bg-clip-text text-transparent">{stats.total}</p>
                                 </div>
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}>
+                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
                                     <p className="text-sm font-black text-white/70">🏷️ Categories</p>
                                     <p className="text-4xl font-black mt-2 bg-gradient-to-r from-purple-300 to-purple-200 bg-clip-text text-transparent">{categories.length}</p>
                                 </div>
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}>
+                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
                                     <p className="text-sm font-black text-white/70">🏠 Rooms</p>
                                     <p className="text-4xl font-black mt-2 bg-gradient-to-r from-blue-300 to-blue-200 bg-clip-text text-transparent">{rooms.length}</p>
                                 </div>
-                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}>
+                                <div className="glass-effect-colored rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all duration-300" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
                                     <p className="text-sm font-black text-white/70">🔍 Results</p>
                                     <p className="text-4xl font-black mt-2 bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300 bg-clip-text text-transparent">{searchResults.length}</p>
                                 </div>
@@ -917,15 +975,14 @@
                     </div>
 
                     <div className="max-w-7xl mx-auto px-6 py-8">
-                        <div className="flex gap-4 mb-8 glass-effect-colored p-2 rounded-2xl shadow-lg" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}>
+                        <div className="flex gap-4 mb-8 glass-effect-colored p-2 rounded-2xl shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
                             <button
                                 onClick={() => { setActiveTab('search'); setViewMode('all'); }}
-                                className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${
-                                    activeTab === 'search'
+                                className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'search'
                                         ? 'text-white shadow-lg'
                                         : 'text-white/60 hover:text-white/80'
-                                }`}
-                                style={activeTab === 'search' ? {background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)'} : {}}
+                                    }`}
+                                style={activeTab === 'search' ? { background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
                             >
                                 <div className="flex items-center justify-center gap-3">
                                     <Search size={24} />
@@ -934,12 +991,11 @@
                             </button>
                             <button
                                 onClick={() => { setActiveTab('all'); setViewMode('all'); }}
-                                className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${
-                                    activeTab === 'all'
+                                className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'all'
                                         ? 'text-white shadow-lg'
                                         : 'text-white/60 hover:text-white/80'
-                                }`}
-                                style={activeTab === 'all' ? {background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)'} : {}}
+                                    }`}
+                                style={activeTab === 'all' ? { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
                             >
                                 <div className="flex items-center justify-center gap-3">
                                     <Package size={24} />
@@ -953,7 +1009,7 @@
 
                         {activeTab === 'search' && (
                             <div>
-                                <div className="glass-effect-colored rounded-3xl shadow-lg p-8 mb-8" style={{background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}>
+                                <div className="glass-effect-colored rounded-3xl shadow-lg p-8 mb-8" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
                                     <div className="flex gap-4 flex-wrap">
                                         <div className="flex-1 relative min-w-64">
                                             <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-pink-400" size={28} />
@@ -964,13 +1020,13 @@
                                                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                                                 placeholder="Search by name, room, category..."
                                                 className="w-full pl-16 pr-6 py-5 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 text-lg font-bold transition-all shadow-lg"
-                                                style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                             />
                                         </div>
                                         <button
                                             onClick={handleSearch}
                                             className="px-10 py-5 text-white rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg shadow-lg"
-                                            style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)'}}
+                                            style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
                                         >
                                             🔍 Search
                                         </button>
@@ -1002,10 +1058,10 @@
                                             <div className="h-10 w-2 bg-gradient-to-b from-pink-400 to-purple-400 rounded-full"></div>
                                             <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">Explore Your Stuff</span>
                                         </h2>
-                                        
+
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                                             {/* Rooms Card */}
-                                            <div 
+                                            <div
                                                 onClick={() => setViewMode('rooms')}
                                                 className="glass-effect rounded-3xl p-8 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-purple-400/50 group backdrop-blur-md"
                                             >
@@ -1036,7 +1092,7 @@
                                             </div>
 
                                             {/* Categories Card */}
-                                            <div 
+                                            <div
                                                 onClick={() => setViewMode('categories')}
                                                 className="glass-effect rounded-3xl p-8 cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-purple-400/50 group backdrop-blur-md"
                                             >
@@ -1220,8 +1276,8 @@
 
                     {(showAddItem || editingItem) && (
                         <div className="fixed inset-0 bg-black/40 backdrop-blur-xl flex items-center justify-center p-4 z-40 animate-fade-in">
-                            <div className="glass-effect-colored rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}>
-                                <div className="sticky top-0 text-white p-8 rounded-t-3xl border-b border-white/20 shadow-lg" style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.5) 50%, rgba(59, 130, 246, 0.5) 100%)'}}>
+                            <div className="glass-effect-colored rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}>
+                                <div className="sticky top-0 text-white p-8 rounded-t-3xl border-b border-white/20 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.5) 50%, rgba(59, 130, 246, 0.5) 100%)' }}>
                                     <div className="flex justify-between items-center">
                                         <h2 className="text-3xl font-black drop-shadow-lg">
                                             {editingItem ? '✏️ Edit Item' : '✨ Add New Item'}
@@ -1249,7 +1305,7 @@
                                             value={itemForm.name}
                                             onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })}
                                             className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                             placeholder="e.g., Red Suitcase, Winter Jacket"
                                         />
                                     </div>
@@ -1259,7 +1315,7 @@
                                             value={itemForm.category}
                                             onChange={(e) => setItemForm({ ...itemForm, category: e.target.value })}
                                             className="w-full px-5 py-4 text-gray-900 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                         >
                                             <option value="">Select a category</option>
                                             <option value="Luggage">🧳 Luggage</option>
@@ -1288,7 +1344,7 @@
                                             value={itemForm.room}
                                             onChange={(e) => setItemForm({ ...itemForm, room: e.target.value })}
                                             className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                             placeholder="e.g., Master Bedroom, Living Room"
                                         />
                                     </div>
@@ -1300,7 +1356,7 @@
                                                 value={itemForm.cupboard}
                                                 onChange={(e) => setItemForm({ ...itemForm, cupboard: e.target.value })}
                                                 className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
-                                                style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                                 placeholder="e.g., 1st"
                                             />
                                         </div>
@@ -1311,7 +1367,7 @@
                                                 value={itemForm.shelf}
                                                 onChange={(e) => setItemForm({ ...itemForm, shelf: e.target.value })}
                                                 className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
-                                                style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                                 placeholder="e.g., Top"
                                             />
                                         </div>
@@ -1322,7 +1378,7 @@
                                                 value={itemForm.loft}
                                                 onChange={(e) => setItemForm({ ...itemForm, loft: e.target.value })}
                                                 className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
-                                                style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                                style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                                 placeholder="e.g., A"
                                             />
                                         </div>
@@ -1334,7 +1390,7 @@
                                             value={itemForm.inside_items}
                                             onChange={(e) => setItemForm({ ...itemForm, inside_items: e.target.value })}
                                             className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-pink-400/50 focus:border-pink-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                             rows="4"
                                             placeholder="One item per line"
                                         />
@@ -1347,7 +1403,7 @@
                                             value={itemForm.notes}
                                             onChange={(e) => setItemForm({ ...itemForm, notes: e.target.value })}
                                             className="w-full px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-blue-400/50 focus:border-blue-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                             rows="4"
                                             placeholder="Add extra details..."
                                         />
@@ -1363,7 +1419,7 @@
                                                 if (f) setImageName(f.name);
                                             }}
                                             className="w-full text-white font-bold py-2 px-3 rounded-lg"
-                                            style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                         />
                                         <input
                                             type="text"
@@ -1374,13 +1430,13 @@
                                             }}
                                             placeholder="Optional photo name"
                                             className="w-full mt-2 px-5 py-4 text-white placeholder-white/50 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
-                                            style={{background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)'}}
+                                            style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                         />
                                     </div>
                                     <button
                                         onClick={editingItem ? handleUpdateItem : handleAddItem}
                                         className="w-full text-white py-6 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-2xl shadow-lg"
-                                        style={{background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)'}}
+                                        style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
                                     >
                                         {editingItem ? 'Update' : 'Create'}
                                     </button>
@@ -1390,14 +1446,14 @@
                     )}
                     {dialog.open && (
                         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-                            <div className="bg-white rounded-2xl p-6 max-w-md w-full text-gray-900" style={{border: '1px solid rgba(0,0,0,0.08)'}}>
+                            <div className="bg-white rounded-2xl p-6 max-w-md w-full text-gray-900" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
                                 <h3 className="text-xl font-bold mb-2">{dialog.type === 'confirm' ? 'Confirm' : 'Notice'}</h3>
                                 <p className="mb-6 text-sm whitespace-pre-wrap">{dialog.message}</p>
                                 <div className="flex justify-end gap-3">
                                     {dialog.type === 'confirm' && (
                                         <button onClick={() => closeDialog()} className="px-4 py-2 rounded-lg font-bold bg-gray-200 text-gray-800">Cancel</button>
                                     )}
-                                    <button onClick={() => { if (dialog.onConfirm) { try { dialog.onConfirm(); } catch(e){ console.error(e); } } else { closeDialog(); } }} className="px-4 py-2 rounded-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-white">OK</button>
+                                    <button onClick={() => { if (dialog.onConfirm) { try { dialog.onConfirm(); } catch (e) { console.error(e); } } else { closeDialog(); } }} className="px-4 py-2 rounded-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-white">OK</button>
                                 </div>
                             </div>
                         </div>
@@ -1409,7 +1465,7 @@
         ReactDOM.render(<HomeInventoryApp />, document.getElementById('root'));
 
         // Floating Image Gallery Button (outside React)
-        (function(){
+        (function () {
             const btn = document.createElement('button');
             btn.textContent = '🖼️ Gallery';
             btn.style.position = 'fixed';
@@ -1427,11 +1483,11 @@
             btn.style.border = '2px solid rgba(255,255,255,0.4)';
             btn.style.backdropFilter = 'blur(16px)';
             btn.style.transition = 'all 0.3s ease';
-            btn.onmouseover = function() {
+            btn.onmouseover = function () {
                 this.style.transform = 'scale(1.08)';
                 this.style.boxShadow = '0 15px 40px rgba(59, 130, 246, 0.5)';
             };
-            btn.onmouseout = function() {
+            btn.onmouseout = function () {
                 this.style.transform = 'scale(1)';
                 this.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.3)';
             };
@@ -1499,14 +1555,14 @@
                 closeBtn.style.fontSize = '14px';
                 closeBtn.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)';
                 closeBtn.style.transition = 'all 0.3s ease';
-                closeBtn.onmouseover = function() {
+                closeBtn.onmouseover = function () {
                     this.style.transform = 'scale(1.05)';
                 };
-                closeBtn.onmouseout = function() {
+                closeBtn.onmouseout = function () {
                     this.style.transform = 'scale(1)';
                 };
                 closeBtn.onclick = () => {
-                    try{ document.body.removeChild(overlay); }catch(e){}
+                    try { document.body.removeChild(overlay); } catch (e) { }
                 };
                 overlay.appendChild(closeBtn);
 
@@ -1520,7 +1576,7 @@
                 inner.appendChild(status);
 
                 document.body.appendChild(overlay);
-                
+
                 try {
                     // First, load categories and show category grid. Clicking a category will load images for that category.
                     const resCats = await fetch(`${API_BASE_URL}/categories/list`, { headers: getAuthHeaders(false) });
@@ -1554,8 +1610,8 @@
                             el.style.justifyContent = 'center';
                             el.style.border = '2px solid rgba(255, 255, 255, 0.6)';
                             el.style.cursor = 'pointer';
-                            el.onmouseover = function() { this.style.transform = 'scale(1.03)'; this.style.boxShadow = '0 10px 30px rgba(59,130,246,0.12)'; };
-                            el.onmouseout = function() { this.style.transform = 'scale(1)'; this.style.boxShadow = 'none'; };
+                            el.onmouseover = function () { this.style.transform = 'scale(1.03)'; this.style.boxShadow = '0 10px 30px rgba(59,130,246,0.12)'; };
+                            el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.boxShadow = 'none'; };
                             const title = document.createElement('div');
                             title.textContent = (cat.name || 'Unnamed') + ' (' + (cat.count || 0) + ')';
                             title.style.fontWeight = '900';
@@ -1608,8 +1664,8 @@
                             el.style.backdropFilter = 'blur(16px)';
                             el.style.transition = 'all 0.3s ease';
                             el.style.cursor = 'pointer';
-                            el.onmouseover = function() { this.style.transform = 'scale(1.05)'; this.style.borderColor = 'rgba(59, 130, 246, 0.8)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)'; };
-                            el.onmouseout = function() { this.style.transform = 'scale(1)'; this.style.borderColor = 'rgba(255, 255, 255, 0.5)'; this.style.boxShadow = 'none'; };
+                            el.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.borderColor = 'rgba(59, 130, 246, 0.8)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)'; };
+                            el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.borderColor = 'rgba(255, 255, 255, 0.5)'; this.style.boxShadow = 'none'; };
                             const img = document.createElement('img');
                             img.src = API_BASE_URL + item.image_path;
                             img.alt = item.image_name || item.name;
@@ -1691,19 +1747,19 @@
                             d.style.padding = '12px';
                             d.style.borderRadius = '12px';
                             d.style.border = '1px solid rgba(59, 130, 246, 0.08)';
-                            const l = document.createElement('div'); 
-                            l.textContent = label; 
-                            l.style.fontSize = '13px'; 
-                            l.style.color = '#3b82f6'; 
+                            const l = document.createElement('div');
+                            l.textContent = label;
+                            l.style.fontSize = '13px';
+                            l.style.color = '#3b82f6';
                             l.style.fontWeight = '900';
                             l.style.textTransform = 'uppercase';
-                            const v = document.createElement('div'); 
-                            v.textContent = val || '-'; 
-                            v.style.marginTop = '6px'; 
+                            const v = document.createElement('div');
+                            v.textContent = val || '-';
+                            v.style.marginTop = '6px';
                             v.style.fontWeight = '900';
                             v.style.color = '#1d1d1d';
-                            d.appendChild(l); 
-                            d.appendChild(v); 
+                            d.appendChild(l);
+                            d.appendChild(v);
                             return d;
                         };
 
@@ -1722,26 +1778,26 @@
                             ins.style.background = 'rgba(59, 130, 246, 0.05)';
                             ins.style.borderRadius = '12px';
                             ins.style.border = '1px solid rgba(59, 130, 246, 0.08)';
-                            const lbl = document.createElement('div'); 
-                            lbl.textContent = 'Inside Items'; 
-                            lbl.style.fontWeight = '900'; 
-                            lbl.style.color = '#3b82f6'; 
+                            const lbl = document.createElement('div');
+                            lbl.textContent = 'Inside Items';
+                            lbl.style.fontWeight = '900';
+                            lbl.style.color = '#3b82f6';
                             lbl.style.marginBottom = '10px';
                             lbl.style.fontSize = '14px';
                             lbl.style.textTransform = 'uppercase';
                             ins.appendChild(lbl);
-                            const ul = document.createElement('ul'); 
+                            const ul = document.createElement('ul');
                             ul.style.paddingLeft = '20px';
                             ul.style.listStyle = 'none';
-                            String(item.inside_items).split('\n').forEach(line => { 
-                                const t = line && line.trim(); 
-                                if (t) { 
-                                    const li = document.createElement('li'); 
-                                    li.textContent = '✓ ' + t.replace(/^[-.\s]+/, ''); 
+                            String(item.inside_items).split('\n').forEach(line => {
+                                const t = line && line.trim();
+                                if (t) {
+                                    const li = document.createElement('li');
+                                    li.textContent = '✓ ' + t.replace(/^[-.\s]+/, '');
                                     li.style.color = '#1d1d1d';
                                     li.style.fontWeight = '600';
                                     li.style.marginBottom = '4px';
-                                    ul.appendChild(li); 
+                                    ul.appendChild(li);
                                 }
                             });
                             ins.appendChild(ul);
@@ -1749,26 +1805,26 @@
                         }
 
                         if (item.notes) {
-                            const notes = document.createElement('div'); 
-                            notes.style.marginTop = '16px'; 
+                            const notes = document.createElement('div');
+                            notes.style.marginTop = '16px';
                             notes.style.padding = '16px';
                             notes.style.background = 'rgba(139, 92, 246, 0.05)';
                             notes.style.borderRadius = '12px';
                             notes.style.border = '1px solid rgba(139, 92, 246, 0.08)';
-                            const lbl = document.createElement('div'); 
-                            lbl.textContent = 'Notes'; 
-                            lbl.style.fontWeight = '900'; 
-                            lbl.style.color = '#8b5cf6'; 
+                            const lbl = document.createElement('div');
+                            lbl.textContent = 'Notes';
+                            lbl.style.fontWeight = '900';
+                            lbl.style.color = '#8b5cf6';
                             lbl.style.marginBottom = '8px';
                             lbl.style.fontSize = '14px';
                             lbl.style.textTransform = 'uppercase';
                             notes.appendChild(lbl);
-                            const p = document.createElement('div'); 
-                            p.textContent = item.notes; 
-                            p.style.whiteSpace = 'pre-wrap'; 
+                            const p = document.createElement('div');
+                            p.textContent = item.notes;
+                            p.style.whiteSpace = 'pre-wrap';
                             p.style.color = '#1d1d1d';
                             p.style.fontWeight = '600';
-                            notes.appendChild(p); 
+                            notes.appendChild(p);
                             panel.appendChild(notes);
                         }
 
@@ -1787,8 +1843,8 @@
                         back.style.border = '2px solid rgba(255,255,255,0.4)';
                         back.style.fontSize = '14px';
                         back.style.transition = 'all 0.3s ease';
-                        back.onmouseover = function() { this.style.transform = 'scale(1.05)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.4)'; };
-                        back.onmouseout = function() { this.style.transform = 'scale(1)'; };
+                        back.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.4)'; };
+                        back.onmouseout = function () { this.style.transform = 'scale(1)'; };
                         back.onclick = () => { renderCategories(cats); };
                         actions.appendChild(back);
                         panel.appendChild(actions);
@@ -1822,7 +1878,7 @@
 
                     // initial render: show categories
                     renderCategories(cats);
-                }catch(err){
+                } catch (err) {
                     status.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
                 }
             };
@@ -1830,4 +1886,5 @@
         })();
     </script>
 </body>
+
 </html>

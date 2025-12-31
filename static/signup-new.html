@@ -1,21 +1,39 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sign Up - Home Inventory</title>
   <style>
-    * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif; }
-    
-    @keyframes float { 
-      0%, 100% { transform: translateY(0px); } 
-      50% { transform: translateY(-8px); } 
+    * {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
     }
-    @keyframes glow-shift { 
-      0%, 100% { filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.4)); } 
-      50% { filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.5)); } 
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
     }
-    
+
+    @keyframes glow-shift {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 30px rgba(236, 72, 153, 0.5));
+      }
+    }
+
     body {
       margin: 0;
       padding: 24px;
@@ -32,8 +50,8 @@
       position: fixed;
       inset: 0;
       background: radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0;
     }
@@ -189,11 +207,13 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <a href="/">
       <svg class="logo-glow" width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" stroke="url(#grad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" stroke="url(#grad)"
+          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
         <defs>
           <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
@@ -202,7 +222,8 @@
           </linearGradient>
         </defs>
       </svg>
-      <div style="font-weight: 900; font-size: 20px; background: linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+      <div
+        style="font-weight: 900; font-size: 20px; background: linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
         Home Inventory
       </div>
     </a>
@@ -214,13 +235,13 @@
     <form id="signupForm">
       <label>Full Name</label>
       <input id="full_name" type="text" placeholder="John Doe" required />
-      
+
       <label>Email</label>
       <input id="email" type="email" placeholder="your@email.com" required />
-      
+
       <label>Password</label>
       <input id="password" type="password" placeholder="••••••••" required maxlength="128" />
-      
+
       <div class="form-group">
         <button type="submit">Sign Up ✨</button>
         <a id="loginLink" href="/auth/login-page" class="login-link">Already have an account?</a>
@@ -230,25 +251,25 @@
   </div>
 
   <script>
-    const API = window.location.origin;
+    const API = "https://home-inventory-production.up.railway.app";
     const form = document.getElementById('signupForm');
     const msg = document.getElementById('msg');
     // If there's a next param, append it to the login link so users can return after logging in
-    try{const p = new URLSearchParams(window.location.search); const n = p.get('next'); if(n){ const l = document.getElementById('loginLink'); if(l) l.href = '/auth/login-page?next=' + encodeURIComponent(n);} }catch(e){}
-    form.addEventListener('submit', async (e)=>{
+    try { const p = new URLSearchParams(window.location.search); const n = p.get('next'); if (n) { const l = document.getElementById('loginLink'); if (l) l.href = '/auth/login-page?next=' + encodeURIComponent(n); } } catch (e) { }
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       msg.textContent = '';
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const full_name = document.getElementById('full_name').value;
-      try{
+      try {
         const res = await fetch(API + '/auth/signup', {
           method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({email,password,full_name})
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, full_name })
         });
-        if (!res.ok){
-          const d = await res.json().catch(()=>({detail:res.statusText}));
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({ detail: res.statusText }));
           msg.textContent = '⚠️ Signup failed: ' + (d.detail || res.statusText || res.status);
           msg.style.borderLeftColor = 'rgba(239, 68, 68, 0.8)';
           return;
@@ -257,37 +278,38 @@
         // after successful signup, auto-login
         const loginRes = await fetch(API + '/auth/login', {
           method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({email,password})
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
         });
-        if (!loginRes.ok){
+        if (!loginRes.ok) {
           msg.textContent = '⚠️ Signup succeeded but auto-login failed';
           msg.style.borderLeftColor = 'rgba(239, 68, 68, 0.8)';
           return;
         }
         const tokenData = await loginRes.json();
-        if (tokenData && tokenData.access_token){
+        if (tokenData && tokenData.access_token) {
           localStorage.setItem('access_token', tokenData.access_token);
           msg.textContent = '✅ Welcome aboard! Redirecting...';
           msg.style.borderLeftColor = 'rgba(34, 197, 94, 0.8)';
           // redirect to next (if present) or root
-          try{
+          try {
             const params = new URLSearchParams(window.location.search);
             let next = params.get('next') || '/';
             if (!next.startsWith('/')) next = '/';
             setTimeout(() => window.location.href = next, 800);
-          }catch(e){
+          } catch (e) {
             setTimeout(() => window.location.href = '/', 800);
           }
         } else {
           msg.textContent = '⚠️ Signup completed but token missing';
           msg.style.borderLeftColor = 'rgba(239, 68, 68, 0.8)';
         }
-      }catch(err){
+      } catch (err) {
         msg.textContent = '⚠️ Network error: ' + err.message;
         msg.style.borderLeftColor = 'rgba(239, 68, 68, 0.8)';
       }
     });
   </script>
 </body>
+
 </html>
