@@ -1,0 +1,16 @@
+{
+    "rewrites": [
+        {
+            "source": "/auth/:path*",
+            "destination": "https://home-inventory-production.up.railway.app/auth/:path*"
+        },
+        {
+            "source": "/items/:path*",
+            "destination": "https://home-inventory-production.up.railway.app/items/:path*"
+        },
+        {
+            "source": "/search/:path*",
+            "destination": "https://home-inventory-production.up.railway.app/search/:path*"
+        }
+    ]
+}
