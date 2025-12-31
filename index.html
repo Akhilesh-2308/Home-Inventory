@@ -768,7 +768,7 @@
                                 {item.image_path && (
                                     <div className="mt-4">
                                         <img
-                                            src={`${API_BASE_URL}${item.image_path}`}
+                                            src={item.image_path}
                                             alt={item.image_name || item.name}
                                             className="w-full h-48 object-cover rounded-2xl cursor-pointer mb-3 hover:scale-105 transition-transform duration-300 shadow-lg border border-white/30"
                                             onClick={() => {
@@ -892,8 +892,8 @@
                 <div className="min-h-screen">
                     {notification && (
                         <div className={`fixed top-6 right-6 px-8 py-4 rounded-2xl shadow-xl z-50 animate-slide-in font-black text-lg border ${notification.type === 'success'
-                                ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white border-emerald-200 shadow-emerald-500/50'
-                                : 'bg-gradient-to-r from-red-400 to-pink-500 text-white border-red-200 shadow-red-500/50'
+                            ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white border-emerald-200 shadow-emerald-500/50'
+                            : 'bg-gradient-to-r from-red-400 to-pink-500 text-white border-red-200 shadow-red-500/50'
                             }`}>
                             {notification.type === 'success' ? '✓ ' : '⚠ '}{notification.message}
                         </div>
@@ -979,8 +979,8 @@
                             <button
                                 onClick={() => { setActiveTab('search'); setViewMode('all'); }}
                                 className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'search'
-                                        ? 'text-white shadow-lg'
-                                        : 'text-white/60 hover:text-white/80'
+                                    ? 'text-white shadow-lg'
+                                    : 'text-white/60 hover:text-white/80'
                                     }`}
                                 style={activeTab === 'search' ? { background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
                             >
@@ -992,8 +992,8 @@
                             <button
                                 onClick={() => { setActiveTab('all'); setViewMode('all'); }}
                                 className={`flex-1 px-8 py-4 rounded-xl font-black transition-all duration-300 text-lg ${activeTab === 'all'
-                                        ? 'text-white shadow-lg'
-                                        : 'text-white/60 hover:text-white/80'
+                                    ? 'text-white shadow-lg'
+                                    : 'text-white/60 hover:text-white/80'
                                     }`}
                                 style={activeTab === 'all' ? { background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)' } : {}}
                             >
