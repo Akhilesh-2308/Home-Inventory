@@ -350,6 +350,8 @@
             const [filteredItems, setFilteredItems] = useState([]);
             const [notification, setNotification] = useState(null);
             const [stats, setStats] = useState({ total: 0, categories: {} });
+            const [isSearching, setIsSearching] = useState(false);
+            const [isCreating, setIsCreating] = useState(false);
 
             const [itemForm, setItemForm] = useState({
                 name: '',
@@ -528,7 +530,12 @@
                     showNotification('Please enter a search term', 'error');
                     return;
                 }
+                if (isSearching) {
+                    showNotification('Search is already in progress...', 'error');
+                    return;
+                }
                 try {
+                    setIsSearching(true);
                     const response = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(searchTerm)}&mode=text`, { headers: getAuthHeaders(false) });
                     const data = await response.json();
                     setSearchResults(data);
@@ -539,6 +546,8 @@
                     }
                 } catch (error) {
                     showNotification('Search failed', 'error');
+                } finally {
+                    setIsSearching(false);
                 }
             };
 
@@ -577,7 +586,12 @@
                     showNotification('Please select a room', 'error');
                     return;
                 }
+                if (isCreating) {
+                    showNotification('Item creation is already in progress...', 'error');
+                    return;
+                }
                 try {
+                    setIsCreating(true);
                     const response = await fetch(`${API_BASE_URL}/items/`, {
                         method: 'POST',
                         headers: getAuthHeaders(true),
@@ -613,6 +627,8 @@
                     }
                 } catch (error) {
                     showNotification('Failed to add item', 'error');
+                } finally {
+                    setIsCreating(false);
                 }
             };
 
@@ -627,7 +643,12 @@
                     showNotification('Please select a room', 'error');
                     return;
                 }
+                if (isCreating) {
+                    showNotification('Item update is already in progress...', 'error');
+                    return;
+                }
                 try {
+                    setIsCreating(true);
                     const response = await fetch(`${API_BASE_URL}/items/${editingItem.id}`, {
                         method: 'PUT',
                         headers: getAuthHeaders(true),
@@ -666,6 +687,8 @@
                     }
                 } catch (error) {
                     showNotification('Failed to update item', 'error');
+                } finally {
+                    setIsCreating(false);
                 }
             };
 
@@ -1025,10 +1048,11 @@
                                         </div>
                                         <button
                                             onClick={handleSearch}
-                                            className="px-10 py-5 text-white rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg shadow-lg"
-                                            style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
+                                            disabled={isSearching}
+                                            className={`px-10 py-5 text-white rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-lg shadow-lg ${isSearching ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                            style={{ background: isSearching ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.5) 0%, rgba(59, 130, 246, 0.5) 100%)' : 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
                                         >
-                                            🔍 Search
+                                            {isSearching ? '🔄 Searching...' : '🔍 Search'}
                                         </button>
                                     </div>
                                 </div>
@@ -1435,10 +1459,11 @@
                                     </div>
                                     <button
                                         onClick={editingItem ? handleUpdateItem : handleAddItem}
-                                        className="w-full text-white py-6 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-2xl shadow-lg"
-                                        style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
+                                        disabled={isCreating}
+                                        className={`w-full text-white py-6 rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-black text-2xl shadow-lg ${isCreating ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                        style={{ background: isCreating ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.5) 0%, rgba(59, 130, 246, 0.5) 100%)' : 'linear-gradient(135deg, rgba(236, 72, 153, 0.7) 0%, rgba(139, 92, 246, 0.7) 100%)', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
                                     >
-                                        {editingItem ? 'Update' : 'Create'}
+                                        {isCreating ? (editingItem ? '🔄 Updating...' : '🔄 Creating...') : (editingItem ? 'Update' : 'Create')}
                                     </button>
                                 </div>
                             </div>
