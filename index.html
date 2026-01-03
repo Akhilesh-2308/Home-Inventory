@@ -326,6 +326,17 @@
 
         const API_BASE_URL = "https://home-inventory-production.up.railway.app";
 
+        // Resolve image URL: if path already absolute, return as-is; otherwise prefix with API base
+        const resolveImageUrl = (path) => {
+            if (!path) return '';
+            try {
+                const trimmed = String(path).trim();
+                if (/^https?:\/\//i.test(trimmed) || /^\/\//.test(trimmed)) return trimmed;
+                if (trimmed.startsWith('/')) return API_BASE_URL.replace(/\/$/, '') + trimmed;
+                return API_BASE_URL.replace(/\/$/, '') + '/' + trimmed;
+            } catch (e) { return path; }
+        };
+
         const getAuthHeaders = (isJson = true) => {
             const token = localStorage.getItem('access_token');
             const headers = {};
@@ -366,6 +377,9 @@
             });
             const [imageFile, setImageFile] = useState(null);
             const [imageName, setImageName] = useState('');
+            const [creatingCategory, setCreatingCategory] = useState(false);
+            const [newCategoryName, setNewCategoryName] = useState('');
+            const [creatingCategoryLoading, setCreatingCategoryLoading] = useState(false);
             const [dialog, setDialog] = useState({ open: false, message: '', type: 'alert', onConfirm: null });
 
             const openAlert = (message) => setDialog({ open: true, message, type: 'alert', onConfirm: null });
@@ -791,9 +805,9 @@
                                 {item.image_path && (
                                     <div className="mt-4">
                                         <img
-                                            src={item.image_path}
+                                            src={resolveImageUrl(item.image_path)}
                                             alt={item.image_name || item.name}
-                                            className="w-full h-48 object-cover rounded-2xl cursor-pointer mb-3 hover:scale-105 transition-transform duration-300 shadow-lg border border-white/30"
+                                            className="w-full h-48 object-contain rounded-2xl cursor-pointer mb-3 hover:scale-105 transition-transform duration-300 shadow-lg border border-white/30"
                                             onClick={() => {
                                                 const loc = `${item.room}${item.cupboard ? ', ' + item.cupboard : ''}${item.shelf ? ', ' + item.shelf : ''}${item.loft ? ', ' + item.loft : ''}`;
                                                 openAlert('📍 Location: ' + loc);
@@ -1337,7 +1351,17 @@
                                         <label className="block text-sm font-black text-purple-300 mb-2 uppercase tracking-widest drop-shadow-md">Category</label>
                                         <select
                                             value={itemForm.category}
-                                            onChange={(e) => setItemForm({ ...itemForm, category: e.target.value })}
+                                            onChange={(e) => {
+                                                const v = e.target.value;
+                                                if (v === '__create__') {
+                                                    setCreatingCategory(true);
+                                                    setNewCategoryName('');
+                                                    // clear selection until created
+                                                    setItemForm({ ...itemForm, category: '' });
+                                                } else {
+                                                    setItemForm({ ...itemForm, category: v });
+                                                }
+                                            }}
                                             className="w-full px-5 py-4 text-gray-900 rounded-2xl focus:ring-4 focus:ring-purple-400/50 focus:border-purple-400 transition-all text-lg font-bold shadow-lg"
                                             style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1.5px solid rgba(255, 255, 255, 0.2)' }}
                                         >
@@ -1358,7 +1382,90 @@
                                             <option value="Travel Items">✈️ Travel Items</option>
                                             <option value="Car Accessories">🚗 Car Accessories</option>
                                             <option value="Misc">📦 Misc</option>
+                                            {categories && categories.map((c, idx) => (
+                                                <option key={"cat_" + idx} value={c.name}>{c.name}</option>
+                                            ))}
+                                            <option value="__create__">➕ Create Own</option>
                                         </select>
+                                        {creatingCategory && (
+                                            <div className="mt-3 flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={newCategoryName}
+                                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                                    placeholder="Enter new category"
+                                                    className="flex-1 px-4 py-3 rounded-2xl text-gray-900 font-bold"
+                                                    style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.08)' }}
+                                                />
+                                                <button
+                                                    onClick={async () => {
+                                                        const name = (newCategoryName || '').trim();
+                                                        if (!name) {
+                                                            showNotification('Please enter a category name', 'error');
+                                                            return;
+                                                        }
+                                                        if (creatingCategoryLoading) return;
+                                                        setCreatingCategoryLoading(true);
+                                                        // try create via API, fallback to local state
+                                                        try {
+                                                            const resp = await fetch(`${API_BASE_URL}/categories`, {
+                                                                method: 'POST',
+                                                                headers: getAuthHeaders(true),
+                                                                body: JSON.stringify({ name })
+                                                            });
+                                                            if (resp.ok) {
+                                                                // prefer using returned object if present
+                                                                let created = null;
+                                                                try { created = await resp.json(); } catch (e) { created = null; }
+                                                                if (created && (created.name || created.id)) {
+                                                                    setCategories(prev => {
+                                                                        const exists = prev && prev.find && prev.find(c => String(c.name).toLowerCase() === String(created.name || name).toLowerCase());
+                                                                        if (exists) return prev;
+                                                                        return ([...(prev || []), created]);
+                                                                    });
+                                                                    setItemForm({ ...itemForm, category: created.name || name });
+                                                                } else {
+                                                                    // refresh from server if possible
+                                                                    try { await fetchCategories(); } catch (e) { /* ignore */ }
+                                                                    setItemForm({ ...itemForm, category: name });
+                                                                }
+                                                                setCreatingCategory(false);
+                                                                setNewCategoryName('');
+                                                                showNotification('Category created');
+                                                                setCreatingCategoryLoading(false);
+                                                                return;
+                                                            } else {
+                                                                // try to surface server error
+                                                                let errText = resp.statusText || 'Failed to create category';
+                                                                try { const j = await resp.json(); errText = j.detail || j.error || JSON.stringify(j); } catch (e) { /* ignore */ }
+                                                                showNotification(`Server rejected category: ${errText}`, 'error');
+                                                            }
+                                                        } catch (err) {
+                                                            console.warn('Category create failed', err);
+                                                        }
+                                                        // fallback: add locally for this user session
+                                                        try {
+                                                            setCategories(prev => {
+                                                                const exists = prev && prev.find && prev.find(c => String(c.name).toLowerCase() === name.toLowerCase());
+                                                                if (exists) return prev;
+                                                                return ([...(prev || []), { name, count: 0 }]);
+                                                            });
+                                                            setItemForm({ ...itemForm, category: name });
+                                                            setCreatingCategory(false);
+                                                            setNewCategoryName('');
+                                                            showNotification('Category added locally');
+                                                        } catch (e) { console.error(e); showNotification('Failed to add category', 'error'); }
+                                                        setCreatingCategoryLoading(false);
+                                                    }}
+                                                    disabled={creatingCategoryLoading}
+                                                    className={creatingCategoryLoading ? "px-4 py-3 rounded-2xl bg-gray-400 text-white font-black cursor-not-allowed" : "px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black"}
+                                                >{creatingCategoryLoading ? 'Saving...' : 'Save'}</button>
+                                                <button
+                                                    onClick={() => { setCreatingCategory(false); setNewCategoryName(''); }}
+                                                    className="px-4 py-3 rounded-2xl bg-white/30 text-white font-black"
+                                                >Cancel</button>
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <label className="block text-sm font-black text-blue-300 mb-2 uppercase tracking-widest drop-shadow-md">Room *</label>
@@ -1692,11 +1799,11 @@
                             el.onmouseover = function () { this.style.transform = 'scale(1.05)'; this.style.borderColor = 'rgba(59, 130, 246, 0.8)'; this.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)'; };
                             el.onmouseout = function () { this.style.transform = 'scale(1)'; this.style.borderColor = 'rgba(255, 255, 255, 0.5)'; this.style.boxShadow = 'none'; };
                             const img = document.createElement('img');
-                            img.src = API_BASE_URL + item.image_path;
+                            img.src = (function(p){ try { if (!p) return ''; if (/^https?:\/\//i.test(p)) return p; if (p.startsWith('/')) return API_BASE_URL.replace(/\/$/, '') + p; return API_BASE_URL.replace(/\/$/, '') + '/' + p; } catch(e){return p;} })(item.image_path);
                             img.alt = item.image_name || item.name;
                             img.style.width = '100%';
                             img.style.height = '180px';
-                            img.style.objectFit = 'cover';
+                            img.style.objectFit = 'contain';
                             img.style.borderRadius = '12px';
                             img.style.cursor = 'pointer';
                             img.onclick = () => { showDetail(item); };
@@ -1742,7 +1849,7 @@
                         panel.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.1)';
 
                         const big = document.createElement('img');
-                        big.src = API_BASE_URL + item.image_path;
+                        big.src = resolveImageUrl(item.image_path);
                         big.style.width = '100%';
                         big.style.maxHeight = '520px';
                         big.style.objectFit = 'contain';
